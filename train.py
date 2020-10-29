@@ -155,4 +155,5 @@ if __name__ == '__main__':
 
     tpu, strategy = detect_hardware(args.tpu)
     cfg.merge_from_file('configs/' + args.cfg)
+    cfg.MODEL.NAME = args.cfg.split('.yaml')[0]
     train(strategy, cfg)

@@ -1,5 +1,4 @@
 MODEL:
-  NAME: 'sb_resnet50'
   TYPE: 'simple_baseline'
   BACKBONE: 'resnet50'
   HEAD_CHANNELS: 256
