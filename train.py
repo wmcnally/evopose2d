@@ -26,6 +26,8 @@ def mse_loss(model, images, targets, valid, training=True):
 
 
 def train(strategy, cfg):
+    os.makedirs(cfg.MODEL.SAVE_DIR, exist_ok=True)
+
     if cfg.DATASET.BFLOAT16:
         policy = mixed_precision.Policy('mixed_bfloat16')
         mixed_precision.set_policy(policy)
@@ -91,7 +93,7 @@ def train(strategy, cfg):
             val_loss.update_state(loss)
         strategy.run(step_fn, args=(dist_inputs,))
 
-    print('Training model {} ({:.2f}M / {:.2f}G) for {} epochs'
+    print('Training {} ({:.2f}M / {:.2f}G) for {} epochs'
           .format(cfg.MODEL.NAME,
                   meta_data['parameters']/1e6,
                   meta_data['flops']/2/1e9,

@@ -51,6 +51,7 @@ cn.MODEL.HEAD_ACTIVATION = 'swish'
 cn.MODEL.GENOTYPE = None
 cn.MODEL.WIDTH_COEFFICIENT = 1.
 cn.MODEL.DEPTH_COEFFICIENT = 1.
+cn.MODEL.SAVE_DIR = 'models'
 
 cn.SEARCH = CN(new_allowed=True)
 
