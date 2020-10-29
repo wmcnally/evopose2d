@@ -1,0 +1,23 @@
+MODEL:
+  TYPE: 'simple_baseline'
+  BACKBONE: 'resnet50'
+  HEAD_CHANNELS: 256
+  HEAD_KERNEL: 4
+  HEAD_ACTIVATION: 'relu'
+
+TRAIN:
+  BATCH_SIZE: 1024
+  EPOCHS: 140
+  WARMUP_EPOCHS: 5
+  LR_SCHEDULE: 'warmup_piecewise'
+  DECAY_EPOCHS: [90, 120]
+
+VAL:
+  BATCH_SIZE: 256
+
+DATASET:
+  TFRECORDS: 'gs://willmcnally1/TF2-SimpleHumanPose/tfrecords'
+  CACHE: true
+  BFLOAT16: true
+
+
