@@ -93,8 +93,8 @@ def train(strategy, cfg):
 
     print('Training model {} ({:.2f}M / {:.2f}G) for {} epochs'
           .format(cfg.MODEL.NAME,
-                  meta_data['model_parameters']/1e6,
-                  meta_data['model_flops']/2/1e9,
+                  meta_data['parameters']/1e6,
+                  meta_data['flops']/2/1e9,
                   cfg.TRAIN.EPOCHS))
 
     epoch = 1
