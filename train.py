@@ -26,7 +26,7 @@ def mse_loss(model, images, targets, valid, training=True):
 
 
 def train(strategy, cfg):
-    if cfg.TRAIN.BFLOAT16:
+    if cfg.DATASET.BFLOAT16:
         policy = mixed_precision.Policy('mixed_bfloat16')
         mixed_precision.set_policy(policy)
 
