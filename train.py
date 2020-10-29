@@ -36,7 +36,7 @@ def train(strategy, cfg):
     meta_data = {'train_loss': [], 'val_loss': [], 'config': cfg}
 
     spe = int(np.ceil(cfg.DATASET.TRAIN_SAMPLES / cfg.TRAIN.BATCH_SIZE))
-    spv = cfg.DATASET.VAL_SAMPLES // cfg.TEST.BATCH_SIZE
+    spv = cfg.DATASET.VAL_SAMPLES // cfg.VAL.BATCH_SIZE
 
     lr = cfg.TRAIN.BASE_LR * cfg.TRAIN.BATCH_SIZE / 32
     if cfg.TRAIN.LR_SCHEDULE == 'warmup_cosine_decay':
