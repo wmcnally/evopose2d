@@ -1,8 +1,10 @@
+import os
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 import tensorflow as tf
+tf.get_logger().setLevel('ERROR')
 from tensorflow.keras.mixed_precision import experimental as mixed_precision
 import numpy as np
 from lr_schedules import WarmupCosineDecay, WarmupPiecewise
-import os
 import os.path as osp
 from utils import get_flops, detect_hardware
 from dataset.dataloader import load_tfds
@@ -11,8 +13,6 @@ from nets.simple_basline import simple_baseline
 from time import time
 import pickle
 import argparse
-
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
 
 @tf.function
