@@ -57,8 +57,8 @@ if __name__ == '__main__':
     cfg = meta_data['config']
 
     # if cfg.DATASET.BFLOAT16:
-    #     policy = mixed_precision.Policy('mixed_float16')
-    #     mixed_precision.set_policy(policy)
+    policy = mixed_precision.Policy('mixed_bfloat16')
+    mixed_precision.set_policy(policy)
 
     cfg.VAL.BATCH_SIZE = args.batch_size
     cfg.DATASET.CACHE = False
