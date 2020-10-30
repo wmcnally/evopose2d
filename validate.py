@@ -125,6 +125,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     cfg.merge_from_file('configs/' + args.cfg)
+    cfg.MODEL.NAME = args.cfg.split('.yaml')[0]
     if args.det >= 0:
         cfg.VAL.DET = bool(args.det)
     tpu, strategy = detect_hardware(args.tpu)
