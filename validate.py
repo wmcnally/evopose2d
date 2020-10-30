@@ -42,7 +42,7 @@ def get_preds(hms, Ms, input_shape, output_shape):
     return preds
 
 
-def validate(strategy, cfg, drop_remainder=True):
+def validate(strategy, cfg):
     cfg.DATASET.CACHE = False
     meta_data = pickle.load(open('models/' + cfg.MODEL.NAME + '_meta.pkl', 'rb'))
     result_path = 'models/{}-result.json'.format(cfg.MODEL.NAME)
@@ -51,11 +51,12 @@ def validate(strategy, cfg, drop_remainder=True):
     with strategy.scope():
         model = tf.keras.models.load_model('models/' + cfg.MODEL.NAME + '.h5', compile=False)
 
-    print('Loaded checkpoint {}'.format(args.model_name))
+    print('Loaded checkpoint {}'.format(cfg.MODEL.NAME))
     print('Parameters: {:.2f}M'.format(meta_data['parameters'] / 1e6))
     print('Multiply-Adds: {:.2f}G'.format(meta_data['flops'] / 2 / 1e9))
 
-    ds = load_tfds(cfg, 'val', det=args.det, predict_kp=True, drop_remainder=cfg.VAL.DROP_REMAINDER)
+    ds = load_tfds(cfg, 'val', det=cfg.VAL.DET,
+                   predict_kp=True, drop_remainder=cfg.VAL.DROP_REMAINDER)
     ds = strategy.experimental_distribute_dataset(ds)
 
     @tf.function
@@ -92,7 +93,7 @@ def validate(strategy, cfg, drop_remainder=True):
         # rescore
         rescored_score = np.zeros((len(kp_scores)))
         for i in range(len(kp_scores)):
-            score_mask = kp_scores[i] > args.score_thresh
+            score_mask = kp_scores[i] > cfg.VAL.SCORE_THRESH
             if np.sum(score_mask) > 0:
                 rescored_score[i] = np.mean(kp_scores[i][score_mask]) * scores[i]
         score_result = rescored_score
@@ -117,7 +118,6 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--tpu', default=None)
     parser.add_argument('-m', '--model-name', required=True)  # exclude .h5 extension
-    parser.add_argument('--coco-path', default='/media/wmcnally/data/coco')
     parser.add_argument('-bs', '--batch-size', type=int, default=None)
     parser.add_argument('--det', type=int, default=0)
     parser.add_argument('--score-thresh', type=float, default=0.2)
