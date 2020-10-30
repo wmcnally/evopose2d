@@ -87,8 +87,9 @@ def validate(strategy, cfg):
     results = []
     count = 0
     for batch in tqdm(ds):
-        ids, hms, Ms, scores = predict_dist(model, batch, cfg.DATASET.KP_FLIP)
-        if count > 0:
+        if count == 0:
+            ids, hms, Ms, scores = predict_dist(model, batch, cfg.DATASET.KP_FLIP)
+        else:
             ids_b, hms_b, Ms_b, scores_b = predict_dist(model, batch, cfg.DATASET.KP_FLIP)
             ids = tf.concat((ids, ids_b), axis=0)
             hms = tf.concat((hms, hms_b), axis=0)
@@ -100,8 +101,6 @@ def validate(strategy, cfg):
     hms = hms.numpy()
     Ms = Ms.numpy()
     scores = scores.numpy()
-
-    print(ids.shape, hms.shape, Ms.shape, scores.shape)
 
     preds = get_preds(hms, Ms, cfg.DATASET.INPUT_SHAPE, cfg.DATASET.OUTPUT_SHAPE)
     kp_scores = preds[:, :, -1].copy()
