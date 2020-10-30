@@ -1,7 +1,6 @@
 import os
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 import argparse
-import os.path as osp
 import pickle
 from pycocotools.coco import COCO
 from pycocotools.cocoeval import COCOeval
@@ -12,8 +11,7 @@ from tqdm import tqdm
 import math
 import json
 import cv2
-from utils import get_flops, detect_hardware
-import sys
+from utils import detect_hardware
 from dataset.coco import cn as cfg
 
 
@@ -104,6 +102,8 @@ def validate(strategy, cfg):
     Ms = Ms.numpy()
     scores = scores.numpy()
 
+    print(ids.shape, hms.shape, Ms.shape, scores.shape)
+
     preds = get_preds(hms, Ms, cfg.DATASET.INPUT_SHAPE, cfg.DATASET.OUTPUT_SHAPE)
     kp_scores = preds[:, :, -1].copy()
 
@@ -135,8 +135,11 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--tpu', default=None)
     parser.add_argument('-c', '--cfg', required=True)  # yaml
+    parser.add_argument('--det', type=int, default=-1)
     args = parser.parse_args()
 
     cfg.merge_from_file('configs/' + args.cfg)
+    if args.det >= 0:
+        cfg.VAL.DET = bool(args.det)
     tpu, strategy = detect_hardware(args.tpu)
     validate(strategy, cfg)
