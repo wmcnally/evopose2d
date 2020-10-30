@@ -14,7 +14,6 @@ import json
 import cv2
 from utils import get_flops, detect_hardware
 import sys
-from tensorflow.keras.mixed_precision import experimental as mixed_precision
 
 
 def get_preds(hms, Ms, input_shape, output_shape):
@@ -43,55 +42,27 @@ def get_preds(hms, Ms, input_shape, output_shape):
     return preds
 
 
-if __name__ == '__main__':
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--tpu', default=None)
-    parser.add_argument('-m', '--model-name', required=True)
-    parser.add_argument('--coco-path', default='/media/wmcnally/data/coco')
-    parser.add_argument('-bs', '--batch-size', type=int, default=256)
-    parser.add_argument('--det', type=int, default=0)
-    parser.add_argument('--score-thresh', type=float, default=0.2)
-    args = parser.parse_args()
-
-    meta_data = pickle.load(open('models/' + args.model_name.split('.h5')[0] + '_meta.pkl', 'rb'))
-    cfg = meta_data['config']
-
-    # if cfg.DATASET.BFLOAT16:
-    policy = mixed_precision.Policy('mixed_bfloat16')
-    mixed_precision.set_policy(policy)
-
-    cfg.VAL.BATCH_SIZE = args.batch_size
+def validate(strategy, cfg, drop_remainder=True):
     cfg.DATASET.CACHE = False
-    # cfg.DATASET.BFLOAT16 = False
-    # sys.exit()
-
-    tpu, strategy = detect_hardware(args.tpu)
-
-    if tpu:
-        cfg.DATASET.TFRECORDS = 'gs://willmcnally1/TF2-SimpleHumanPose/tfrecords'  # public bucket
-        drop_remainder = True  # this is required with TPU, will reduce AP
-    else:
-        cfg.DATASET.TFRECORDS = '/media/wmcnally/data/coco/TF2-SimpleHumanPose/tfrecords'
-        drop_remainder = False
-
-    result_path = 'models/{}-result.json'.format(args.model_name.split('.h5')[0])
-    coco = COCO(osp.join(args.coco_path, 'annotations', 'person_keypoints_val2017.json'))
+    meta_data = pickle.load(open('models/' + cfg.MODEL.NAME + '_meta.pkl', 'rb'))
+    result_path = 'models/{}-result.json'.format(cfg.MODEL.NAME)
+    coco = COCO(cfg.DATASET.ANNOT)
 
     with strategy.scope():
-        model = tf.keras.models.load_model('models/' + args.model_name, compile=False)
+        model = tf.keras.models.load_model('models/' + cfg.MODEL.NAME + '.h5', compile=False)
 
     print('Loaded checkpoint {}'.format(args.model_name))
     print('Parameters: {:.2f}M'.format(meta_data['parameters'] / 1e6))
     print('Multiply-Adds: {:.2f}G'.format(meta_data['flops'] / 2 / 1e9))
+
+    ds = load_tfds(cfg, 'val', det=args.det, predict_kp=True, drop_remainder=cfg.VAL.DROP_REMAINDER)
+    ds = strategy.experimental_distribute_dataset(ds)
 
     @tf.function
     def predict(imgs, flip=False):
         if flip:
             imgs = imgs[:, :, ::-1, :]
         return model(imgs, training=False)
-
-    ds = load_tfds(cfg, 'val', det=args.det, predict_kp=True, drop_remainder=drop_remainder)
-    ds = strategy.experimental_distribute_dataset(ds)
 
     results = []
     for batch in tqdm(ds):
@@ -140,3 +111,22 @@ if __name__ == '__main__':
     cocoEval.evaluate()
     cocoEval.accumulate()
     cocoEval.summarize()
+
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--tpu', default=None)
+    parser.add_argument('-m', '--model-name', required=True)  # exclude .h5 extension
+    parser.add_argument('--coco-path', default='/media/wmcnally/data/coco')
+    parser.add_argument('-bs', '--batch-size', type=int, default=None)
+    parser.add_argument('--det', type=int, default=0)
+    parser.add_argument('--score-thresh', type=float, default=0.2)
+    args = parser.parse_args()
+
+    meta_data = pickle.load(open('models/' + args.model_name + '_meta.pkl', 'rb'))
+    cfg = meta_data['config']
+    if args.batch_size:
+        cfg.VAL.BATCH_SIZE = args.batch_size
+
+    tpu, strategy = detect_hardware(args.tpu)
+    validate(strategy, cfg)
