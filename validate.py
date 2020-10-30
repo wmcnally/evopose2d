@@ -67,7 +67,6 @@ def validate(strategy, cfg):
         return model(imgs, training=False)
 
     results = []
-    count = 0
     for batch in tqdm(ds):
         ids, imgs, _, Ms, scores = batch
 
@@ -89,39 +88,22 @@ def validate(strategy, cfg):
             flip_hms[:, :, 1:, :] = flip_hms[:, :, 0:-1, :].copy()
             hms = (hms + flip_hms) / 2.
 
-        if count == 0:
-            all_ids = ids
-            all_hms = hms
-            all_Ms = Ms
-            all_scores = scores
-        else:
-            all_ids = np.concatenate((all_ids, ids), axis=0)
-            all_hms = np.concatenate((all_hms, hms), axis=0)
-            all_Ms = np.concatenate((all_Ms, Ms), axis=0)
-            all_scores = np.concatenate((all_scores, scores), axis=0)
-        count += 1
+        preds = get_preds(hms, Ms, cfg.DATASET.INPUT_SHAPE, cfg.DATASET.OUTPUT_SHAPE)
+        kp_scores = preds[:, :, -1].copy()
 
-    ids = all_ids
-    hms = all_hms
-    Ms = all_Ms
-    scores = all_scores
+        # rescore
+        rescored_score = np.zeros((len(kp_scores)))
+        for i in range(len(kp_scores)):
+            score_mask = kp_scores[i] > cfg.VAL.SCORE_THRESH
+            if np.sum(score_mask) > 0:
+                rescored_score[i] = np.mean(kp_scores[i][score_mask]) * scores[i]
+        score_result = rescored_score
 
-    preds = get_preds(hms, Ms, cfg.DATASET.INPUT_SHAPE, cfg.DATASET.OUTPUT_SHAPE)
-    kp_scores = preds[:, :, -1].copy()
-
-    # rescore
-    rescored_score = np.zeros((len(kp_scores)))
-    for i in range(len(kp_scores)):
-        score_mask = kp_scores[i] > cfg.VAL.SCORE_THRESH
-        if np.sum(score_mask) > 0:
-            rescored_score[i] = np.mean(kp_scores[i][score_mask]) * scores[i]
-    score_result = rescored_score
-
-    for i in range(preds.shape[0]):
-        results.append(dict(image_id=int(ids[i]),
-                            category_id=1,
-                            keypoints=preds[i].reshape(-1).tolist(),
-                            score=float(score_result[i])))
+        for i in range(preds.shape[0]):
+            results.append(dict(image_id=int(ids[i]),
+                                category_id=1,
+                                keypoints=preds[i].reshape(-1).tolist(),
+                                score=float(score_result[i])))
 
     with open(result_path, 'w') as f:
         json.dump(results, f)
@@ -137,14 +119,11 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--tpu', default=None)
     parser.add_argument('-c', '--cfg', required=True)  # yaml
-    parser.add_argument('-bs', '--batch-size', type=int, default=None)
-    parser.add_argument('--det', type=int, default=0)
     args = parser.parse_args()
 
     cfg.merge_from_file('configs/' + args.cfg)
     if args.batch_size:
         cfg.VAL.BATCH_SIZE = args.batch_size
-    cfg.VAL.DET = True if args.det else False
 
     tpu, strategy = detect_hardware(args.tpu)
     validate(strategy, cfg)
