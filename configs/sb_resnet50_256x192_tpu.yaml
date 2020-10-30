@@ -1,4 +1,5 @@
 MODEL:
+  NAME: 'sb_resnet50_256x192_tpu'
   TYPE: 'simple_baseline'
   BACKBONE: 'resnet50'
   HEAD_CHANNELS: 256

@@ -14,6 +14,7 @@ import json
 import cv2
 from utils import get_flops, detect_hardware
 import sys
+from dataset.coco import cn as cfg
 
 
 def get_preds(hms, Ms, input_shape, output_shape):
@@ -117,16 +118,15 @@ def validate(strategy, cfg):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--tpu', default=None)
-    parser.add_argument('-m', '--model-name', required=True)  # exclude .h5 extension
+    parser.add_argument('-c', '--cfg', required=True)  # yaml
     parser.add_argument('-bs', '--batch-size', type=int, default=None)
     parser.add_argument('--det', type=int, default=0)
-    parser.add_argument('--score-thresh', type=float, default=0.2)
     args = parser.parse_args()
 
-    meta_data = pickle.load(open('models/' + args.model_name + '_meta.pkl', 'rb'))
-    cfg = meta_data['config']
+    cfg.merge_from_file('configs/' + args.cfg)
     if args.batch_size:
         cfg.VAL.BATCH_SIZE = args.batch_size
+    cfg.VAL.DET = True if args.det else False
 
     tpu, strategy = detect_hardware(args.tpu)
     validate(strategy, cfg)
