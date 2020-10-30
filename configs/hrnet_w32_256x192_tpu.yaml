@@ -1,0 +1,39 @@
+MODEL:
+  TYPE: 'hrnet'
+  STAGE1:
+    NUM_MODULES: 1
+    NUM_CHANNELS: [64]
+    NUM_BLOCKS: [4]
+    BLOCK: 'bottleneck'
+  STAGE2:
+    NUM_MODULES: 1
+    NUM_CHANNELS: [32, 64]
+    NUM_BLOCKS: [4, 4]
+    BLOCK: 'basic'
+  STAGE3:
+    NUM_MODULES: 4
+    NUM_CHANNELS: [32, 64, 128]
+    NUM_BLOCKS: [4, 4, 4]
+    BLOCK: 'basic'
+  STAGE4:
+    NUM_MODULES: 3
+    NUM_CHANNELS: [32, 64, 128, 256]
+    NUM_BLOCKS: [4, 4, 4, 4]
+    BLOCK: 'basic'
+
+TRAIN:
+  BATCH_SIZE: 256
+  EPOCHS: 210
+  WARMUP_EPOCHS: 5
+  LR_SCHEDULE: 'warmup_piecewise'
+  DECAY_EPOCHS: [170, 200]
+
+VAL:
+  BATCH_SIZE: 256
+
+DATASET:
+  TFRECORDS: 'gs://willmcnally1/TF2-SimpleHumanPose/tfrecords'
+  CACHE: true
+  BFLOAT16: true
+
+
