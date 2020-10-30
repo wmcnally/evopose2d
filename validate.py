@@ -122,8 +122,5 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     cfg.merge_from_file('configs/' + args.cfg)
-    if args.batch_size:
-        cfg.VAL.BATCH_SIZE = args.batch_size
-
     tpu, strategy = detect_hardware(args.tpu)
     validate(strategy, cfg)
