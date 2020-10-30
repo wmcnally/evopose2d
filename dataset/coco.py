@@ -12,6 +12,7 @@ cn.DATASET.KP_FLIP = [0, 2, 1, 4, 3, 6, 5, 8, 7, 10, 9, 12, 11, 14, 13, 16, 15]
 cn.DATASET.KP_UPPER = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 cn.DATASET.KP_LOWER = []
 cn.DATASET.BGR = False
+cn.DATASET.NORM = True
 cn.DATASET.MEANS = [0.485, 0.456, 0.406]  # imagenet means RGB
 cn.DATASET.STDS = [0.229, 0.224, 0.225]
 cn.DATASET.INPUT_SHAPE = [256, 192, 3]
