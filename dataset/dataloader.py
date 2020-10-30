@@ -1,9 +1,10 @@
-import tensorflow as tf
-import os.path as osp
 import math
-from tensorflow.python.keras.layers.preprocessing import image_preprocessing as image_ops
+import os.path as osp
+
 import cv2
 import numpy as np
+import tensorflow as tf
+from tensorflow.python.keras.layers.preprocessing import image_preprocessing as image_ops
 
 
 def parse_record(record):
@@ -77,6 +78,8 @@ def preprocess(id, img, bbox, kp, score, DATASET, split='train', predict_kp=Fals
 
     x, y, w, h = bbox[0], bbox[1], bbox[2], bbox[3]
     center = [x + w / 2., y + h / 2.]
+    center = tf.cast(tf.stack(center), tf.float32)
+
     aspect_ratio = DATASET.INPUT_SHAPE[1] / DATASET.INPUT_SHAPE[0]
     if w > aspect_ratio * h:
         h = w / aspect_ratio
@@ -84,6 +87,11 @@ def preprocess(id, img, bbox, kp, score, DATASET, split='train', predict_kp=Fals
 
     if split == 'train':
         # augmentation
+        joint_vis = tf.math.reduce_sum(tf.cast(kp[:, 2] > 0, tf.int32))
+        if (joint_vis > DATASET.HALF_BODY_MIN_KP
+                and tf.random.normal([]) < DATASET.HALF_BODY_PROB):
+            center, scale = half_body_transform(kp, center, scale, DATASET)
+
         scale *= tf.clip_by_value(tf.random.normal([]) * DATASET.SCALE_FACTOR + 1,
                                   1 - DATASET.SCALE_FACTOR,
                                   1 + DATASET.SCALE_FACTOR)
@@ -102,6 +110,7 @@ def preprocess(id, img, bbox, kp, score, DATASET, split='train', predict_kp=Fals
             kp = tf.concat([tf.expand_dims(kp_x, axis=1), kp[:, 1:]], axis=-1)
             kp = tf.gather(kp, DATASET.KP_FLIP, axis=0)
             center = [center_x, center[1]]
+            center = tf.cast(tf.stack(center), tf.float32)
     else:
         angle = 0.
 
@@ -127,6 +136,36 @@ def preprocess(id, img, bbox, kp, score, DATASET, split='train', predict_kp=Fals
         return id, img, kp, M, score
     else:
         return img, kp
+
+
+def half_body_transform(joints, center, scale, DATASET):
+    vis_mask = joints[:,2] > 0
+    upper_body_mask = np.zeros(DATASET.OUTPUT_SHAPE[-1])
+    upper_body_mask[DATASET.KP_UPPER] = 1
+    upper_body_mask = tf.cast(tf.stack(upper_body_mask), tf.bool)
+    lower_body_mask = tf.math.logical_not(upper_body_mask)
+    lower_body_mask = tf.math.logical_and(lower_body_mask, vis_mask)
+    upper_body_mask = tf.math.logical_and(upper_body_mask, vis_mask)
+    upper = tf.boolean_mask(joints, upper_body_mask)
+    lower = tf.boolean_mask(joints, lower_body_mask)
+    if tf.random.uniform([]) < 0.5 and tf.shape(upper)[0] > 2:
+        selected_joints = upper
+    else:
+        selected_joints = lower if tf.shape(upper)[0] > 2 else upper
+
+    if tf.shape(selected_joints)[0] < 2:
+        return center, scale
+    center = tf.reduce_mean(selected_joints[:,:2], axis = 0)
+    left_top = tf.math.reduce_min(selected_joints[:,:2], axis = 0)
+    right_bottom = tf.math.reduce_max(selected_joints[:,:2], axis = 0)
+    w = right_bottom[0] - left_top[0]
+    h = right_bottom[1] - left_top[1]
+    aspect_ratio = DATASET.INPUT_SHAPE[1] / DATASET.INPUT_SHAPE[0]
+    if w > aspect_ratio * h:
+        h = w * 1.0 / aspect_ratio
+    scale = (h * 1.25) / DATASET.INPUT_SHAPE[0]
+    scale = scale * 1.5
+    return center, scale
 
 
 def generate_heatmaps(kp, DATASET):
@@ -187,13 +226,14 @@ def visualize(img, joints, valid):
 if __name__ == '__main__':
     tf.random.set_seed(0)
 
-    from coco import cfg
-    cfg.DATASET.INPUT_SHAPE = [512, 388, 3]
+    from coco import cn as cfg
+    cfg.DATASET.INPUT_SHAPE = [512, 384, 3]
     cfg.DATASET.NORM = False
     cfg.DATASET.BGR = True
+    cfg.DATASET.HALF_BODY_PROB = 1.
 
-    ds = load_tfds(cfg, 'val', det=False, predict_kp=True)
-    for id, img, kp, M, score in ds:
+    ds = load_tfds(cfg, 'train', det=False, predict_kp=True, drop_remainder=False)
+    for i, (id, img, kp, M, score) in enumerate(ds):
         cv2.imshow('', visualize(np.uint8(img[0]), kp[0, :, :2].numpy(), kp[0, :, -1].numpy()))
         cv2.waitKey()
         cv2.destroyAllWindows()
