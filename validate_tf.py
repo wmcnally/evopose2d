@@ -48,19 +48,17 @@ def predict_dist(model, dist_batch, flip_indices):
     def predict(imgs, flip=False):
         if flip:
             imgs = imgs[:, :, ::-1, :]
-        return model(imgs, training=False)
+        return tf.cast(model(imgs, training=False), tf.float32)
 
     ids = tf.concat(ids.values, axis=0)
     Ms = tf.concat(Ms.values, axis=0)
     scores = tf.concat(scores.values, axis=0)
 
     hms = strategy.run(predict, args=(imgs,))
-    hms = tf.cast(hms.values, tf.float32)
-    hms = tf.concat(hms, axis=0)
+    hms = tf.concat(hms.values, axis=0)
 
     flip_hms = strategy.run(predict, args=(imgs, True,))
-    flip_hms = tf.cast(flip_hms.values, tf.float32)
-    flip_hms = tf.concat(flip_hms, axis=0)
+    flip_hms = tf.concat(flip_hms.values, axis=0)
     flip_hms = tf.gather(flip_hms, flip_indices, axis=-1)
     # shift horizontally to align features
     flip_hms = tf.roll(flip_hms, 1, axis=2)
@@ -96,6 +94,7 @@ def validate(strategy, cfg):
             hms = tf.concat((hms, hms_b), axis=0)
             Ms = tf.concat((Ms, Ms_b), axis=0)
             scores = tf.concat((scores, scores_b), axis=0)
+        count += 1
 
     ids = ids.numpy()
     hms = hms.numpy()
