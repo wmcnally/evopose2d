@@ -67,13 +67,17 @@ def preprocess(id, img, bbox, kp, score, DATASET, split='train', predict_kp=Fals
     if DATASET.BGR:
         img = tf.gather(img, [2, 1, 0], axis=-1)
 
-    if DATASET.NORM:
-        img /= 255.
+    if DATASET.CENTER:
         if DATASET.BGR:
             img -= [[DATASET.MEANS[::-1]]]
-            img /= [[DATASET.STDS[::-1]]]
         else:
             img -= [[DATASET.MEANS]]
+
+    if DATASET.SCALE:
+        img /= 255.
+        if DATASET.BGR:
+            img /= [[DATASET.STDS[::-1]]]
+        else:
             img /= [[DATASET.STDS]]
 
     x, y, w, h = bbox[0], bbox[1], bbox[2], bbox[3]
@@ -228,7 +232,7 @@ if __name__ == '__main__':
 
     from coco import cn as cfg
     cfg.DATASET.INPUT_SHAPE = [512, 384, 3]
-    cfg.DATASET.NORM = False
+    cfg.DATASET.CENTER = False
     cfg.DATASET.BGR = True
     cfg.DATASET.HALF_BODY_PROB = 1.
 
