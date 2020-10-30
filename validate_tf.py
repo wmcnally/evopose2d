@@ -51,16 +51,18 @@ def predict_dist(model, dist_batch, flip_indices):
     Ms = tf.concat(Ms.values, axis=0)
     scores = tf.concat(scores.values, axis=0)
 
-    hms = strategy.run(lambda imgs: model(imgs, training=False), args=(imgs,))
+    hms = strategy.run(lambda imgs: model(imgs, training=False),
+                       args=(imgs,))
     hms = tf.cast(hms.values, tf.float32)
     hms = tf.concat(hms, axis=0)
 
     flip_hms = strategy.run(lambda imgs: model(imgs, training=False),
-                            args=(tf.image.flip_left_right(imgs),))
+                            args=(imgs[:, :, ::-1, :],))
     flip_hms = tf.cast(flip_hms.values, tf.float32)
     flip_hms = tf.concat(flip_hms, axis=0)
     flip_hms = tf.gather(flip_hms, flip_indices, axis=-1)
-    flip_hms = tf.roll(flip_hms, 1, axis=2)  # shift horizontally to align features
+    # shift horizontally to align features
+    flip_hms = tf.roll(flip_hms, 1, axis=2)
 
     hms = (hms + flip_hms) / 2
     return ids, hms, Ms, scores
