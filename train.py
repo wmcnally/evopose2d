@@ -62,7 +62,7 @@ def train(strategy, cfg):
         optimizer = tf.keras.optimizers.Adam(lr_schedule)
         if cfg.MODEL.TYPE == 'simple_baseline':
             model = SimpleBaseline(cfg)
-        elif cfg.MODEL_TYPE == 'hrnet':
+        elif cfg.MODEL.TYPE == 'hrnet':
             model = HRNet(cfg)
         train_loss = tf.keras.metrics.Mean()
         val_loss = tf.keras.metrics.Mean()
