@@ -168,10 +168,7 @@ def load_tfds(cfg, split, det=False, predict_kp=False, drop_remainder=True):
     if split == 'train':
         ds = ds.batch(cfg.TRAIN.BATCH_SIZE).prefetch(AUTO)
     else:
-        if det:
-            ds = ds.batch(cfg.VAL.BATCH_SIZE, drop_remainder=False).prefetch(AUTO)
-        else:
-            ds = ds.batch(cfg.VAL.BATCH_SIZE, drop_remainder=drop_remainder).prefetch(AUTO)
+        ds = ds.batch(cfg.VAL.BATCH_SIZE, drop_remainder=drop_remainder).prefetch(AUTO)
     if not predict_kp:
         ds = ds.map(lambda imgs, kp: (imgs, *generate_heatmaps(kp, cfg.DATASET)),
                     num_parallel_calls=AUTO)
