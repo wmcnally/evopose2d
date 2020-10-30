@@ -1,4 +1,5 @@
 import os
+import os.path as osp
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 import argparse
 import pickle
@@ -43,12 +44,14 @@ def get_preds(hms, Ms, input_shape, output_shape):
 
 def validate(strategy, cfg):
     cfg.DATASET.CACHE = False
-    meta_data = pickle.load(open('models/' + cfg.MODEL.NAME + '_meta.pkl', 'rb'))
-    result_path = 'models/{}-result.json'.format(cfg.MODEL.NAME)
+    meta_data = pickle.load(open(
+        osp.join(cfg.MODEL.SAVE_DIR, cfg.MODEL.NAME + '_meta.pkl'), 'rb'))
+    result_path = '{}/{}.json'.format(cfg.MODEL.SAVE_DIR, cfg.MODEL.NAME)
     coco = COCO(cfg.DATASET.ANNOT)
 
     with strategy.scope():
-        model = tf.keras.models.load_model('models/' + cfg.MODEL.NAME + '.h5', compile=False)
+        model = tf.keras.models.load_model(
+            osp.join(cfg.MODEL.SAVE_DIR, cfg.MODEL.NAME + '.h5'), compile=False)
 
     print('Loaded checkpoint {}'.format(cfg.MODEL.NAME))
     print('Parameters: {:.2f}M'.format(meta_data['parameters'] / 1e6))
@@ -111,6 +114,7 @@ def validate(strategy, cfg):
     cocoEval.evaluate()
     cocoEval.accumulate()
     cocoEval.summarize()
+    return cocoEval.stats[0]  # AP
 
 
 if __name__ == '__main__':
