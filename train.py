@@ -41,8 +41,12 @@ def train(strategy, cfg):
     spe = int(np.ceil(cfg.DATASET.TRAIN_SAMPLES / cfg.TRAIN.BATCH_SIZE))
     spv = cfg.DATASET.VAL_SAMPLES // cfg.VAL.BATCH_SIZE
 
-    cfg.TRAIN.WARMUP_FACTOR = 32 / cfg.TRAIN.BATCH_SIZE
-    lr = cfg.TRAIN.BASE_LR * cfg.TRAIN.BATCH_SIZE / 32
+    if cfg.TRAIN.SCALE_LR:
+        lr = cfg.TRAIN.BASE_LR * cfg.TRAIN.BATCH_SIZE / 32
+        cfg.TRAIN.WARMUP_FACTOR = 32 / cfg.TRAIN.BATCH_SIZE
+    else:
+        lr = cfg.TRAIN.BASE_LR
+
     if cfg.TRAIN.LR_SCHEDULE == 'warmup_cosine_decay':
         lr_schedule = WarmupCosineDecay(
             initial_learning_rate=lr,
