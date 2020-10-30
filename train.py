@@ -9,7 +9,8 @@ import os.path as osp
 from utils import get_flops, detect_hardware
 from dataset.dataloader import load_tfds
 from dataset.coco import cn as cfg
-from nets.simple_basline import simple_baseline
+from nets.simple_basline import SimpleBaseline
+from nets.hrnet import HRNet
 from time import time
 import pickle
 import argparse
@@ -40,6 +41,7 @@ def train(strategy, cfg):
     spe = int(np.ceil(cfg.DATASET.TRAIN_SAMPLES / cfg.TRAIN.BATCH_SIZE))
     spv = cfg.DATASET.VAL_SAMPLES // cfg.VAL.BATCH_SIZE
 
+    cfg.TRAIN.WARMUP_FACTOR = 32 / cfg.TRAIN.BATCH_SIZE
     lr = cfg.TRAIN.BASE_LR * cfg.TRAIN.BATCH_SIZE / 32
     if cfg.TRAIN.LR_SCHEDULE == 'warmup_cosine_decay':
         lr_schedule = WarmupCosineDecay(
@@ -59,7 +61,9 @@ def train(strategy, cfg):
     with strategy.scope():
         optimizer = tf.keras.optimizers.Adam(lr_schedule)
         if cfg.MODEL.TYPE == 'simple_baseline':
-            model = simple_baseline(cfg)
+            model = SimpleBaseline(cfg)
+        elif cfg.MODEL_TYPE == 'hrnet':
+            model = HRNet(cfg)
         train_loss = tf.keras.metrics.Mean()
         val_loss = tf.keras.metrics.Mean()
 

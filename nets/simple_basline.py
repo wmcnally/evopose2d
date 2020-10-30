@@ -10,7 +10,7 @@ BACKBONES = {
 }
 
 
-def simple_baseline(cfg):
+def SimpleBaseline(cfg):
     regularizer = l2(cfg.TRAIN.WD)
 
     backbone = BACKBONES[cfg.MODEL.BACKBONE](
@@ -46,6 +46,6 @@ def simple_baseline(cfg):
 if __name__ == '__main__':
     from dataset.coco import cn as cfg
     cfg.merge_from_file('../configs/sb_resnet50_256x192_tpu.yaml')
-    model = simple_baseline(cfg)
+    model = SimpleBaseline(cfg)
     print('{:.2f}M parameters | {:.2f}G multiply-adds'
           .format(model.count_params() / 1e6, get_flops(model) / 1e9 / 2))
