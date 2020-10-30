@@ -47,17 +47,20 @@ def get_preds(hms, Ms, input_shape, output_shape):
 def predict_dist(model, dist_batch, flip_indices):
     ids, imgs, _, Ms, scores = dist_batch
 
+    def predict(imgs, flip=False):
+        if flip:
+            imgs = imgs[:, :, ::-1, :]
+        return model(imgs, training=False)
+
     ids = tf.concat(ids.values, axis=0)
     Ms = tf.concat(Ms.values, axis=0)
     scores = tf.concat(scores.values, axis=0)
 
-    hms = strategy.run(lambda imgs: model(imgs, training=False),
-                       args=(imgs,))
+    hms = strategy.run(predict, args=(imgs,))
     hms = tf.cast(hms.values, tf.float32)
     hms = tf.concat(hms, axis=0)
 
-    flip_hms = strategy.run(lambda imgs: model(imgs, training=False),
-                            args=(imgs[:, :, ::-1, :],))
+    flip_hms = strategy.run(predict, args=(imgs, True,))
     flip_hms = tf.cast(flip_hms.values, tf.float32)
     flip_hms = tf.concat(flip_hms, axis=0)
     flip_hms = tf.gather(flip_hms, flip_indices, axis=-1)
