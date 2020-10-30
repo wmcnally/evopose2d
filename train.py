@@ -14,6 +14,7 @@ from nets.hrnet import HRNet
 from time import time
 import pickle
 import argparse
+from validate import validate
 
 
 @tf.function
@@ -161,9 +162,13 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('-c', '--cfg', required=True)
     parser.add_argument('--tpu', default=None)
+    parser.add_argument('--val', default=1)
     args = parser.parse_args()
 
     tpu, strategy = detect_hardware(args.tpu)
     cfg.merge_from_file('configs/' + args.cfg)
     cfg.MODEL.NAME = args.cfg.split('.yaml')[0]
     train(strategy, cfg)
+
+    if args.val:
+        validate(strategy, cfg)
