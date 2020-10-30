@@ -1,5 +1,8 @@
-from tensorflow.keras.layers import *
 from tensorflow.keras import Model
+from tensorflow.keras.layers import *
+from tensorflow.keras.regularizers import l2
+
+from utils import add_regularization
 
 
 def basic_block(x, out_channels, stride=1, name=''):
@@ -148,7 +151,9 @@ def HRNet(cfg):
         xs = stage(xs, stage_cfg, name='s{}'.format(i + 1))
 
     output = Conv2D(cfg.DATASET.OUTPUT_SHAPE[-1], 1, name='final_conv')(xs[0])
-    return Model(inputs=input, outputs=output, name='hrnet')
+    model = Model(inputs=input, outputs=output, name='hrnet')
+    add_regularization(model, l2(cfg.TRAIN.WD))
+    return model
 
 
 if __name__ == '__main__':
