@@ -65,9 +65,8 @@ def train_generation(cfg, accelerators, meta_files, models, genotypes):
         for m in not_parents:
             os.remove(osp.join(cfg.SEARCH.DIR, m.split('_')[0], m))
         parents *= cfg.SEARCH.CHILDREN // cfg.SEARCH.PARENTS
-        parents = [osp.join(cfg.SEARCH.DIR, p.split('_')[0], p) for p in parents]  # paths
-        print(parents)
         parent_genotypes = [genotypes[np.int(p.split('_')[1])] for p in parents]
+    parents = [osp.join(cfg.SEARCH.DIR, p.split('_')[0], p) for p in parents]  # paths
 
     for i in range(train_cycles):
         train_cfgs = []
