@@ -165,6 +165,7 @@ if __name__ == '__main__':
                                    genotype=genotype_from_blocks_args(DEFAULT_BLOCKS_ARGS),
                                    epochs=cfg.SEARCH.GEN0_EPOCHS, parent=None, disp=True)
             train_wrapper(train_cfg)
+            break
         else:
             # train next generation
             train_generation(copy.deepcopy(cfg), accelerators, meta_files, models, genotypes)
