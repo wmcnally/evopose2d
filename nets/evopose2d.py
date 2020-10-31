@@ -8,7 +8,6 @@ from tensorflow.keras.models import load_model
 from tensorflow.keras.regularizers import l2
 import numpy as np
 from utils import get_flops, partial_weight_transfer
-import tensorflow.keras.backend as K
 
 DEFAULT_BLOCKS_ARGS = [{
     'kernel_size': 3,
@@ -328,7 +327,7 @@ def array_in_list(arr, l):
     return next((True for elem in l if np.array_equal(elem, arr)), False)
 
 
-def mutate(genotype, cache=[], max_stride=4, min_filters=5):
+def mutate(genotype, cache=[], max_stride=4, min_filters=4):
     genotype = np.array(genotype)
     default_genotype = np.array(genotype_from_blocks_args(DEFAULT_BLOCKS_ARGS))
     mutant = genotype.copy()
@@ -406,38 +405,38 @@ def transfer_params(parent, child, disp=False):
 if __name__ == '__main__':
     from dataset.coco import cn as cfg
     # cfg.MODEL.GENOTYPE = genotype_from_blocks_args(DEFAULT_BLOCKS_ARGS)
-    # cfg.MODEL.GENOTYPE = [
-    #     [3, 2, 2, 1],
-    #     [3, 4, 3, 2],
-    #     [5, 3, 5, 2],
-    #     [3, 3, 10, 2],
-    #     [5, 3, 14, 1],
-    #     [5, 4, 15, 1],
-    #     [3, 2, 7, 1]
-    # ]
-    # model = EvoPose(cfg)
-    # model.summary()
-    # print('{:.2f}M / {:.2f}G'.format(model.count_params() / 1e6, get_flops(model) / 1e9 / 2))
+    cfg.MODEL.GENOTYPE = [
+        [3, 2, 2, 1],
+        [3, 4, 3, 2],
+        [5, 3, 5, 2],
+        [3, 3, 10, 2],
+        [5, 3, 14, 1],
+        [5, 4, 15, 1],
+        [3, 2, 7, 1]
+    ]
+    model = EvoPose(cfg)
+    model.summary()
+    print('{:.2f}M / {:.2f}G'.format(model.count_params() / 1e6, get_flops(model) / 1e9 / 2))
 
-    np.random.seed(0)
-    cfg.MODEL.LOAD_WEIGHTS = False
-    parent_genotype = genotype_from_blocks_args(DEFAULT_BLOCKS_ARGS)
-    cfg.MODEL.GENOTYPE = parent_genotype
-    cache = [np.array(parent_genotype)]
-    parent = EvoPose(cfg)
-    print('{:.2f}M / {:.2f}G'.format(parent.count_params() / 1e6, get_flops(parent) / 1e9 / 2))
-    for i in range(200):
-        np.random.seed(i + 200)
-        child_genotype = mutate(cfg.MODEL.GENOTYPE, cache)
-        cache.append(np.array(child_genotype))
-        cfg.MODEL.GENOTYPE = child_genotype
-        child = EvoPose(cfg)
-        child = transfer_params(parent, child)
-        print('{:.2f}M / {:.2f}G'.format(child.count_params() / 1e6, get_flops(child) / 1e9 / 2))
-        print('-')
-        parent = child
-        del child
-        K.clear_session()
+    # np.random.seed(0)
+    # cfg.MODEL.LOAD_WEIGHTS = False
+    # parent_genotype = genotype_from_blocks_args(DEFAULT_BLOCKS_ARGS)
+    # cfg.MODEL.GENOTYPE = parent_genotype
+    # cache = [np.array(parent_genotype)]
+    # parent = EvoPose(cfg)
+    # print('{:.2f}M / {:.2f}G'.format(parent.count_params() / 1e6, get_flops(parent) / 1e9 / 2))
+    # for i in range(200):
+    #     np.random.seed(i + 200)
+    #     child_genotype = mutate(cfg.MODEL.GENOTYPE, cache)
+    #     cache.append(np.array(child_genotype))
+    #     cfg.MODEL.GENOTYPE = child_genotype
+    #     child = EvoPose(cfg)
+    #     child = transfer_params(parent, child)
+    #     print('{:.2f}M / {:.2f}G'.format(child.count_params() / 1e6, get_flops(child) / 1e9 / 2))
+    #     print('-')
+    #     parent = child
+    #     del child
+    #     K.clear_session()
 
 
 
