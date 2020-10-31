@@ -76,8 +76,7 @@ def train_generation(cfg, accelerators, meta_files, models, genotypes):
             if model_id not in completed_ids:
                 np.random.seed(model_id + cfg.TRAIN.SEED)
                 genotype = mutate(parent_genotypes[i * len(accelerators) + j],
-                                  cache=[np.array(genotypes[i]).reshape(-1, 5)
-                                         for i in genotypes.keys()])
+                                  cache=[np.array(genotypes[i]) for i in genotypes.keys()])
                 genotypes[model_id] = genotype
                 parent = parents[i * len(accelerators) + j]
                 train_cfgs.append(
