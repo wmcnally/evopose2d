@@ -11,6 +11,7 @@ from dataset.dataloader import load_tfds
 from dataset.coco import cn as cfg
 from nets.simple_basline import SimpleBaseline
 from nets.hrnet import HRNet
+from nets.evopose2d import EvoPose
 from time import time
 import pickle
 import argparse
@@ -69,9 +70,13 @@ def train(strategy, cfg):
             model = SimpleBaseline(cfg)
         elif cfg.MODEL.TYPE == 'hrnet':
             model = HRNet(cfg)
+        elif cfg.MODEL.TYPE == 'evopose':
+            model = EvoPose(cfg)
         train_loss = tf.keras.metrics.Mean()
         val_loss = tf.keras.metrics.Mean()
+
     cfg.DATASET.OUTPUT_SHAPE = model.output_shape[1:]
+    cfg.DATASET.SIGMA = 2 * cfg.DATASET.OUTPUT_SHAPE[0] / 64
 
     meta_data['parameters'] = model.count_params()
     meta_data['flops'] = get_flops(model)
@@ -137,10 +142,6 @@ def train(strategy, cfg):
 
         train_loss.reset_states()
         val_loss.reset_states()
-
-        if cfg.TRAIN.SAVE_META:
-            pickle.dump(meta_data, open(osp.join(cfg.MODEL.SAVE_DIR,
-                                      '{}_meta.pkl'.format(cfg.MODEL.NAME)), 'wb'))
 
         if cfg.TRAIN.SAVE_EPOCHS and epoch % cfg.TRAIN.SAVE_EPOCHS == 0:
             model.save(osp.join(cfg.MODEL.SAVE_DIR, '{}.h5'

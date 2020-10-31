@@ -1,3 +1,6 @@
+MODEL:
+  TYPE: 'evopose'
+
 SEARCH:
   CHILDREN: 32
   PARENTS: 4

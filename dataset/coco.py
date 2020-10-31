@@ -31,7 +31,7 @@ cn.TRAIN = CN(new_allowed=True)
 cn.TRAIN.BATCH_SIZE = 64
 cn.TRAIN.BASE_LR = 0.00025
 cn.TRAIN.SCALE_LR = True
-cn.TRAIN.LR_SCHEDULE = 'WARMUP_PIECEWISE'
+cn.TRAIN.LR_SCHEDULE = 'warmup_piecewise'
 cn.TRAIN.EPOCHS = 210
 cn.TRAIN.DECAY_FACTOR = 0.1
 cn.TRAIN.DECAY_EPOCHS = [170, 200]
@@ -40,7 +40,6 @@ cn.TRAIN.WARMUP_FACTOR = 0.1
 cn.TRAIN.DISP = True
 cn.TRAIN.SEED = 0
 cn.TRAIN.WD = 1e-5
-cn.TRAIN.SAVE_META = True
 cn.TRAIN.SAVE_EPOCHS = 0
 
 cn.VAL = CN(new_allowed=True)
