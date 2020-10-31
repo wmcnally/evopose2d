@@ -1,12 +1,14 @@
+import os
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 import copy
 import math
-
 from tensorflow.keras import layers, Model
 from tensorflow.keras.applications import EfficientNetB0, EfficientNetB4, EfficientNetB5
 from tensorflow.keras.models import load_model
 from tensorflow.keras.regularizers import l2
-
-from utils import get_flops, transfer_params
+import numpy as np
+from utils import get_flops, partial_weight_transfer
+import tensorflow.keras.backend as K
 
 DEFAULT_BLOCKS_ARGS = [{
     'kernel_size': 3,
@@ -322,24 +324,120 @@ def scaling_parameters(input_shape, default_size=224, alpha=1.2, beta=1.1, gamma
     return d, w, drop_connect_rate
 
 
-def mutate(genotype, cache=[]):
-    return None
+def array_in_list(arr, l):
+    return next((True for elem in l if np.array_equal(elem, arr)), False)
+
+
+def mutate(genotype, cache=[], max_stride=4, min_filters=5):
+    genotype = np.array(genotype)
+    default_genotype = np.array(genotype_from_blocks_args(DEFAULT_BLOCKS_ARGS))
+    mutant = genotype.copy()
+    while np.array_equal(mutant, genotype) or array_in_list(mutant, cache):
+        mutant = genotype.copy()
+        block_id = np.random.randint(mutant.shape[0])
+        gene_id = np.random.randint(mutant.shape[1])
+        if gene_id == 0:  # kernel
+            kernels = np.unique(default_genotype[:, 0])
+            mutant[block_id][gene_id] = kernels[np.random.randint(len(kernels))]
+        elif gene_id == 1:  # repeats
+            if mutant[block_id][gene_id] == 1:
+                mutant[block_id][gene_id] += 1
+            elif mutant[block_id][gene_id] == np.max(default_genotype[:, 1]):
+                mutant[block_id][gene_id] -= 1
+            else:
+                if np.random.uniform() < 0.5:
+                    mutant[block_id][gene_id] += 1
+                else:
+                    mutant[block_id][gene_id] -= 1
+        elif gene_id == 2:  # filters
+            mutant[block_id][gene_id] = np.random.randint(1, max(default_genotype[block_id, 2], min_filters) + 1)
+        elif gene_id == 3:  # stride
+            if block_id > 3:
+                if mutant[block_id][gene_id] == 2 and np.sum(mutant[:, -1] - 1) == max_stride:
+                    mutant[block_id][gene_id] = 1
+                elif mutant[block_id][gene_id] == 1 and np.sum(mutant[:, -1] - 1) < max_stride:
+                    mutant[block_id][gene_id] = 2
+    print('block {}: {} -> {}'.format(block_id, genotype[block_id], mutant[block_id]))
+    return list(mutant)
+
+
+def layer_weights(model):
+    names, weights = [], []
+    for layer in model.layers:
+        if layer.weights:
+            names.append(layer.name)
+            weights.append(layer.get_weights())
+    return names, weights
+
+
+def transfer_params(parent, child, disp=False):
+    parent_layers, parent_weights = layer_weights(parent)
+    for layer in child.layers:
+        if layer.weights:
+            if layer.name in parent_layers:
+                parent_layer_weights = parent_weights[parent_layers.index(layer.name)]
+                try:
+                    # FULL WEIGHT TRANSFER
+                    layer.set_weights(parent_layer_weights)
+                except:
+                    # PARTIAL WEIGHT TRANSFER
+                    partial_weight_transfer(layer, parent_layer_weights, disp)
+
+            else:
+                # get last block with layer
+                layer_name = '_'.join(layer.name.split('_')[1:])
+                blocks_layer = [p for p in sorted(parent_layers)
+                              if layer_name == '_'.join(p.split('_')[1:])
+                              and 'block' in p]
+                if len(blocks_layer) > 0:
+                    parent_layer_weights = parent_weights[parent_layers.index(blocks_layer[-1])]
+                    try:
+                        # FULL WEIGHT TRANSFER
+                        layer.set_weights(parent_layer_weights)
+                    except:
+                        # PARTIAL WEIGHT TRANSFER
+                        partial_weight_transfer(layer, parent_layer_weights, disp)
+                else:
+                    if disp:
+                        print('Did not transfer weights to {}'.format(layer.name))
+    return child
 
 
 if __name__ == '__main__':
     from dataset.coco import cn as cfg
     # cfg.MODEL.GENOTYPE = genotype_from_blocks_args(DEFAULT_BLOCKS_ARGS)
-    cfg.MODEL.GENOTYPE = [
-        [3, 2, 2, 1],
-        [3, 4, 3, 2],
-        [5, 3, 5, 2],
-        [3, 3, 10, 2],
-        [5, 3, 14, 1],
-        [5, 4, 15, 1],
-        [3, 2, 7, 1]
-    ]
-    model = EvoPose(cfg)
+    # cfg.MODEL.GENOTYPE = [
+    #     [3, 2, 2, 1],
+    #     [3, 4, 3, 2],
+    #     [5, 3, 5, 2],
+    #     [3, 3, 10, 2],
+    #     [5, 3, 14, 1],
+    #     [5, 4, 15, 1],
+    #     [3, 2, 7, 1]
+    # ]
+    # model = EvoPose(cfg)
     # model.summary()
-    print('{:.2f}M / {:.2f}G'.format(model.count_params() / 1e6, get_flops(model) / 1e9 / 2))
+    # print('{:.2f}M / {:.2f}G'.format(model.count_params() / 1e6, get_flops(model) / 1e9 / 2))
+
+    np.random.seed(0)
+    cfg.MODEL.LOAD_WEIGHTS = False
+    parent_genotype = genotype_from_blocks_args(DEFAULT_BLOCKS_ARGS)
+    cfg.MODEL.GENOTYPE = parent_genotype
+    cache = [np.array(parent_genotype)]
+    parent = EvoPose(cfg)
+    print('{:.2f}M / {:.2f}G'.format(parent.count_params() / 1e6, get_flops(parent) / 1e9 / 2))
+    for i in range(200):
+        np.random.seed(i + 200)
+        child_genotype = mutate(cfg.MODEL.GENOTYPE, cache)
+        cache.append(np.array(child_genotype))
+        cfg.MODEL.GENOTYPE = child_genotype
+        child = EvoPose(cfg)
+        child = transfer_params(parent, child)
+        print('{:.2f}M / {:.2f}G'.format(child.count_params() / 1e6, get_flops(child) / 1e9 / 2))
+        print('-')
+        parent = child
+        del child
+        K.clear_session()
+
 
 
