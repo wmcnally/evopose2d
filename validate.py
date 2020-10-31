@@ -71,7 +71,7 @@ def validate(strategy, cfg, model=None):
         Ms = np.concatenate(Ms.values, axis=0)
 
         hms = strategy.run(predict, args=(imgs,)).values
-        hms = np.concatenate(hms, axis=0)
+        hms = np.array(np.concatenate(hms, axis=0), np.float32)
 
         if cfg.VAL.FLIP:
             flip_hms = strategy.run(predict, args=(imgs, True,)).values
@@ -101,7 +101,7 @@ def validate(strategy, cfg, model=None):
                                 keypoints=preds[i].reshape(-1).tolist(),
                                 score=float(score_result[i])))
         if cfg.TRAIN.DISP:
-            print('Completed batch', count + 1)
+            print('completed preds batch', count + 1)
 
     with open(result_path, 'w') as f:
         json.dump(results, f)

@@ -108,10 +108,18 @@ def train_wrapper(cfg):
         strategy = tf.distribute.TPUStrategy(tpu)
     else:
         strategy = tf.distribute.OneDeviceStrategy(cfg.TRAIN.ACCELERATOR)
+
     model, meta_data = train(strategy, cfg)
     AP = validate(strategy, cfg, model)
+
+    meta_data['AP'] = AP
     fitness = AP * (meta_data['parameters'] / cfg.SEARCH.TARGET) ** cfg.SEARCH.W
     meta_data['fitness'] = fitness
+    print('{} ({:.2f}M / {:.2f}G) AP: {:.4f} - fit: {:.4f} - {:.2f} mins'
+          .format(cfg.MODEL.NAME, meta_data['parameters'] / 1e6,
+                  meta_data['flops'] / 2 / 1e9,  AP,
+                  fitness, meta_data['training_time'] / 60))
+
     cfg.MODEL.NAME += '_{:.5f}'.format(fitness)
     model.save(osp.join(cfg.MODEL.SAVE_DIR, '{}.h5'.format(cfg.MODEL.NAME)), save_format='h5')
     pickle.dump(meta_data, open(osp.join(cfg.MODEL.SAVE_DIR,
