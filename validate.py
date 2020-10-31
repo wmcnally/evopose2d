@@ -83,7 +83,7 @@ def validate(strategy, cfg, model=None):
             # shift to align features
             flip_hms[:, :, 1:, :] = flip_hms[:, :, 0:-1, :].copy()
             hms = (hms + flip_hms) / 2.
-
+        print(hms.shape)
         preds = get_preds(hms, Ms, cfg.DATASET.INPUT_SHAPE, cfg.DATASET.OUTPUT_SHAPE)
         kp_scores = preds[:, :, -1].copy()
 
@@ -106,14 +106,7 @@ def validate(strategy, cfg, model=None):
     with open(result_path, 'w') as f:
         json.dump(results, f)
 
-    if not cfg.TRAIN.DISP:
-        with suppress_stdout():
-            result = coco.loadRes(result_path)
-            cocoEval = COCOeval(coco, result, iouType='keypoints')
-            cocoEval.evaluate()
-            cocoEval.accumulate()
-            cocoEval.summarize()
-    else:
+    with suppress_stdout():
         result = coco.loadRes(result_path)
         cocoEval = COCOeval(coco, result, iouType='keypoints')
         cocoEval.evaluate()
@@ -134,4 +127,5 @@ if __name__ == '__main__':
     if args.det >= 0:
         cfg.VAL.DET = bool(args.det)
     tpu, strategy = detect_hardware(args.tpu)
-    validate(strategy, cfg)
+    AP = validate(strategy, cfg)
+    print('AP: {:.5f}'.format(AP))

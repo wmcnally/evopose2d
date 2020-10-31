@@ -75,7 +75,7 @@ def train(strategy, cfg):
         train_loss = tf.keras.metrics.Mean()
         val_loss = tf.keras.metrics.Mean()
 
-    cfg.DATASET.OUTPUT_SHAPE = list(model.output_shape[1:])
+    cfg.DATASET.OUTPUT_SHAPE = model.output_shape[1:]
     cfg.DATASET.SIGMA = 2 * cfg.DATASET.OUTPUT_SHAPE[0] / 64
 
     meta_data['parameters'] = model.count_params()
@@ -125,20 +125,13 @@ def train(strategy, cfg):
                       .format(epoch, i + 1, spe, train_loss.result().numpy()))
         meta_data['train_loss'].append(train_loss.result().numpy())
 
-        for i, batch in enumerate(val_ds):
-            val_step(batch)
-            if cfg.TRAIN.DISP:
-                print('val {} ({}/{}) | loss: {:.1f}'
-                  .format(epoch, i + 1, spv, val_loss.result().numpy()))
-        meta_data['val_loss'].append(val_loss.result().numpy())
-
-        if epoch == 1:
-            best_weights = model.get_weights()
-            best_loss = val_loss.result().numpy()
-        else:
-            if val_loss.result().numpy() < best_loss:
-                best_weights = model.get_weights()
-                best_loss = val_loss.result().numpy()
+        if 'DIR' not in cfg.SEARCH:
+            for i, batch in enumerate(val_ds):
+                val_step(batch)
+                if cfg.TRAIN.DISP:
+                    print('val {} ({}/{}) | loss: {:.1f}'
+                      .format(epoch, i + 1, spv, val_loss.result().numpy()))
+            meta_data['val_loss'].append(val_loss.result().numpy())
 
         train_loss.reset_states()
         val_loss.reset_states()
@@ -153,7 +146,6 @@ def train(strategy, cfg):
         epoch += 1
 
     meta_data['training_time'] = time() - ts
-    model.set_weights(best_weights)
     return model, meta_data
 
 
