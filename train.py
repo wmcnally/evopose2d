@@ -75,7 +75,7 @@ def train(strategy, cfg):
         train_loss = tf.keras.metrics.Mean()
         val_loss = tf.keras.metrics.Mean()
 
-    cfg.DATASET.OUTPUT_SHAPE = model.output_shape[1:]
+    cfg.DATASET.OUTPUT_SHAPE = list(model.output_shape[1:])
     cfg.DATASET.SIGMA = 2 * cfg.DATASET.OUTPUT_SHAPE[0] / 64
 
     meta_data['parameters'] = model.count_params()
