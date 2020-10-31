@@ -2,17 +2,15 @@ import os
 import os.path as osp
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 import argparse
-import pickle
 from pycocotools.coco import COCO
 from pycocotools.cocoeval import COCOeval
 import tensorflow as tf
 import numpy as np
 from dataset.dataloader import load_tfds
-from tqdm import tqdm
 import math
 import json
 import cv2
-from utils import detect_hardware
+from utils import detect_hardware, suppress_stdout
 from dataset.coco import cn as cfg
 
 
@@ -42,20 +40,17 @@ def get_preds(hms, Ms, input_shape, output_shape):
     return preds
 
 
-def validate(strategy, cfg):
+def validate(strategy, cfg, model=None):
     cfg.DATASET.CACHE = False
-    meta_data = pickle.load(open(
-        osp.join(cfg.MODEL.SAVE_DIR, cfg.MODEL.NAME + '_meta.pkl'), 'rb'))
     result_path = '{}/{}.json'.format(cfg.MODEL.SAVE_DIR, cfg.MODEL.NAME)
-    coco = COCO(cfg.DATASET.ANNOT)
 
-    with strategy.scope():
-        model = tf.keras.models.load_model(
-            osp.join(cfg.MODEL.SAVE_DIR, cfg.MODEL.NAME + '.h5'), compile=False)
+    with suppress_stdout():
+        coco = COCO(cfg.DATASET.ANNOT)
 
-    print('Loaded checkpoint {}'.format(cfg.MODEL.NAME))
-    print('Parameters: {:.2f}M'.format(meta_data['parameters'] / 1e6))
-    print('Multiply-Adds: {:.2f}G'.format(meta_data['flops'] / 2 / 1e9))
+    if model is None:
+        with strategy.scope():
+            model = tf.keras.models.load_model(
+                osp.join(cfg.MODEL.SAVE_DIR, cfg.MODEL.NAME + '.h5'), compile=False)
 
     ds = load_tfds(cfg, 'val', det=cfg.VAL.DET,
                    predict_kp=True, drop_remainder=cfg.VAL.DROP_REMAINDER)
@@ -68,7 +63,7 @@ def validate(strategy, cfg):
         return model(imgs, training=False)
 
     results = []
-    for batch in tqdm(ds):
+    for count, batch in enumerate(ds):
         ids, imgs, _, Ms, scores = batch
 
         ids = np.concatenate(ids.values, axis=0)
@@ -105,15 +100,25 @@ def validate(strategy, cfg):
                                 category_id=1,
                                 keypoints=preds[i].reshape(-1).tolist(),
                                 score=float(score_result[i])))
+        if cfg.TRAIN.DISP:
+            print('Completed batch', count + 1)
 
     with open(result_path, 'w') as f:
         json.dump(results, f)
 
-    result = coco.loadRes(result_path)
-    cocoEval = COCOeval(coco, result, iouType='keypoints')
-    cocoEval.evaluate()
-    cocoEval.accumulate()
-    cocoEval.summarize()
+    if not cfg.TRAIN.DISP:
+        with suppress_stdout():
+            result = coco.loadRes(result_path)
+            cocoEval = COCOeval(coco, result, iouType='keypoints')
+            cocoEval.evaluate()
+            cocoEval.accumulate()
+            cocoEval.summarize()
+    else:
+        result = coco.loadRes(result_path)
+        cocoEval = COCOeval(coco, result, iouType='keypoints')
+        cocoEval.evaluate()
+        cocoEval.accumulate()
+        cocoEval.summarize()
     return cocoEval.stats[0]  # AP
 
 

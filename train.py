@@ -71,6 +71,7 @@ def train(strategy, cfg):
             model = HRNet(cfg)
         train_loss = tf.keras.metrics.Mean()
         val_loss = tf.keras.metrics.Mean()
+    cfg.DATASET.OUTPUT_SHAPE = model.output_shape[1:]
 
     meta_data['parameters'] = model.count_params()
     meta_data['flops'] = get_flops(model)
@@ -138,13 +139,10 @@ def train(strategy, cfg):
         val_loss.reset_states()
 
         if cfg.TRAIN.SAVE_META:
-            pickle.dump(meta_data,
-                        open(osp.join(cfg.MODEL.SAVE_DIR,
+            pickle.dump(meta_data, open(osp.join(cfg.MODEL.SAVE_DIR,
                                       '{}_meta.pkl'.format(cfg.MODEL.NAME)), 'wb'))
 
-        if (epoch == cfg.TRAIN.EPOCHS
-                or (cfg.TRAIN.SAVE_EPOCHS and epoch % cfg.TRAIN.SAVE_EPOCHS == 0)):
-            model.set_weights(best_weights)
+        if cfg.TRAIN.SAVE_EPOCHS and epoch % cfg.TRAIN.SAVE_EPOCHS == 0:
             model.save(osp.join(cfg.MODEL.SAVE_DIR, '{}.h5'
                                 .format(cfg.MODEL.NAME)), save_format='h5')
 
@@ -154,8 +152,8 @@ def train(strategy, cfg):
         epoch += 1
 
     meta_data['training_time'] = time() - ts
-    pickle.dump(meta_data, open(osp.join(cfg.MODEL.SAVE_DIR,
-                              '{}_meta.pkl'.format(cfg.MODEL.NAME)), 'wb'))
+    model.set_weights(best_weights)
+    return model, meta_data
 
 
 if __name__ == '__main__':
@@ -168,7 +166,10 @@ if __name__ == '__main__':
     tpu, strategy = detect_hardware(args.tpu)
     cfg.merge_from_file('configs/' + args.cfg)
     cfg.MODEL.NAME = args.cfg.split('.yaml')[0]
-    train(strategy, cfg)
+    model, meta_data = train(strategy, cfg)
+    model.save(osp.join(cfg.MODEL.SAVE_DIR, '{}.h5'.format(cfg.MODEL.NAME)), save_format='h5')
+    pickle.dump(meta_data, open(osp.join(cfg.MODEL.SAVE_DIR,
+                                         '{}_meta.pkl'.format(cfg.MODEL.NAME)), 'wb'))
 
     if args.val:
-        validate(strategy, cfg)
+        validate(strategy, cfg, model)

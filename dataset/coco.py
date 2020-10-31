@@ -52,7 +52,8 @@ cn.VAL.DET = True
 
 cn.MODEL = CN(new_allowed=True)
 cn.MODEL.TYPE = 'evopose'
-cn.MODEL.WEIGHT_TRANSFER = True
+cn.MODEL.LOAD_WEIGHTS = True
+cn.MODEL.PARENT = None
 cn.MODEL.GENOTYPE = None
 cn.MODEL.WIDTH_COEFFICIENT = 1.
 cn.MODEL.DEPTH_COEFFICIENT = 1.

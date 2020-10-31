@@ -1,0 +1,28 @@
+SEARCH:
+  CHILDREN: 32
+  PARENTS: 4
+  GEN0_EPOCHS: 30
+  EPOCHS: 5
+  TARGET: 5000000  # parameters
+  W: -0.04
+
+TRAIN:
+  BATCH_SIZE: 1024
+  DISP: false
+  LR_SCHEDULE: 'constant'
+  BASE_LR: 0.001
+  SCALE_LR: false
+  WD: 0.
+
+VAL:
+  BATCH_SIZE: 256
+  FLIP: false
+  DET: false
+  DROP_REMAINDER: true
+
+DATASET:
+  ROT_PROB: 0.
+  SCALE_FACTOR: 0.
+  BFLOAT16: true
+  CACHE: true
+
