@@ -1,12 +1,13 @@
-import tensorflow as tf
-from tensorflow.python.framework.convert_to_constants import convert_variables_to_constants_v2_as_graph
-import tempfile
 import os
 import os.path as osp
 import pickle
-from contextlib import contextmanager
 import sys
+import tempfile
+from contextlib import contextmanager
+
 import numpy as np
+import tensorflow as tf
+from tensorflow.python.framework.convert_to_constants import convert_variables_to_constants_v2_as_graph
 
 
 @contextmanager
@@ -86,36 +87,6 @@ def add_regularization(model, regularizer=tf.keras.regularizers.l2(0.0001)):
     return model
 
 
-def layer_weights(model):
-    names, weights = [], []
-    for layer in model.layers:
-        if layer.weights:
-            names.append(layer.name)
-            weights.append(layer.get_weights())
-    return names, weights
-
-
-def transfer_params(parent, child, param_cache={}, disp=False):
-    parent_layers, parent_weights = layer_weights(parent)
-    for layer in child.layers:
-        if layer.weights:
-            if layer.name in parent_layers:
-                parent_layer_weights = parent_weights[parent_layers.index(layer.name)]
-                try:
-                    # FULL WEIGHT TRANSFER
-                    layer.set_weights(parent_layer_weights)
-                except:
-                    # PARTIAL WEIGHT TRANSFER
-                    partial_weight_transfer(layer, parent_layer_weights, disp)
-            else:
-                if layer.name in param_cache.keys():
-                    layer.set_weights(param_cache[layer.name])
-                else:
-                    if disp:
-                        print("'{}' not in parent or cache".format(layer.name))
-    return child
-
-
 def partial_weight_transfer(child_layer, parent_weights, disp):
     child_weights = child_layer.get_weights()
     for i, child_weight in enumerate(child_weights):
@@ -192,6 +163,7 @@ def partial_weight_transfer(child_layer, parent_weights, disp):
     try:
         child_layer.set_weights(child_weights)
     except:
+
         print("Partial weight transfer failed for '{}'".format(child_layer.name))
 
 
@@ -207,5 +179,5 @@ def get_models(run_dir):
         saved_models.extend(gen_models)
         for m in gen_meta:
             meta_data = pickle.load(open(osp.join(run_dir, g, m), 'rb'))
-            genotypes[np.int(m.split('_')[1])] = meta_data['genotype']
+            genotypes[np.int(m.split('_')[1])] = meta_data['config'].MODEL.GENOTYPE
     return meta_files, saved_models, genotypes
