@@ -327,7 +327,7 @@ def array_in_list(arr, l):
     return next((True for elem in l if np.array_equal(elem, arr)), False)
 
 
-def mutate(genotype, cache=[], max_stride=4, min_filters=4):
+def mutate(genotype, cache=[], max_stride=4):
     genotype = np.array(genotype)
     default_genotype = np.array(genotype_from_blocks_args(DEFAULT_BLOCKS_ARGS))
     mutant = genotype.copy()
@@ -349,7 +349,7 @@ def mutate(genotype, cache=[], max_stride=4, min_filters=4):
                 else:
                     mutant[block_id][gene_id] -= 1
         elif gene_id == 2:  # filters
-            mutant[block_id][gene_id] = np.random.randint(1, max(default_genotype[block_id, 2], min_filters) + 1)
+            mutant[block_id][gene_id] = np.random.randint(1, default_genotype[block_id, 2] + 1)
         elif gene_id == 3:  # stride
             if block_id > 3:
                 if mutant[block_id][gene_id] == 2 and np.sum(mutant[:, -1] - 1) == max_stride:
