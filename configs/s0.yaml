@@ -18,7 +18,7 @@ TRAIN:
 
 VAL:
   BATCH_SIZE: 256
-  FLIP: false
+  FLIP: true
   DET: false
   DROP_REMAINDER: true
 

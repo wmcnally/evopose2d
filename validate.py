@@ -83,7 +83,7 @@ def validate(strategy, cfg, model=None):
             # shift to align features
             flip_hms[:, :, 1:, :] = flip_hms[:, :, 0:-1, :].copy()
             hms = (hms + flip_hms) / 2.
-        print(hms.shape)
+
         preds = get_preds(hms, Ms, cfg.DATASET.INPUT_SHAPE, cfg.DATASET.OUTPUT_SHAPE)
         kp_scores = preds[:, :, -1].copy()
 

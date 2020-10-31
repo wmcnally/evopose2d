@@ -109,10 +109,8 @@ def train(strategy, cfg):
         strategy.run(step_fn, args=(dist_inputs,))
 
     print('Training {} ({:.2f}M / {:.2f}G) for {} epochs'
-          .format(cfg.MODEL.NAME,
-                  meta_data['parameters']/1e6,
-                  meta_data['flops']/2/1e9,
-                  cfg.TRAIN.EPOCHS))
+          .format(cfg.MODEL.NAME, meta_data['parameters']/1e6,
+                  meta_data['flops']/2/1e9, cfg.TRAIN.EPOCHS))
 
     epoch = 1
     ts = time()
@@ -165,4 +163,5 @@ if __name__ == '__main__':
                                          '{}_meta.pkl'.format(cfg.MODEL.NAME)), 'wb'))
 
     if args.val:
-        validate(strategy, cfg, model)
+        AP = validate(strategy, cfg, model)
+        print('AP: {:.5f}'.format(AP))
