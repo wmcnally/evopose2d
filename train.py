@@ -85,8 +85,9 @@ def train(strategy, cfg):
     train_ds = strategy.experimental_distribute_dataset(train_ds)
     train_iterator = iter(train_ds)
 
-    val_ds = load_tfds(cfg, 'val')
-    val_ds = strategy.experimental_distribute_dataset(val_ds)
+    if 'DIR' not in cfg.SEARCH:
+        val_ds = load_tfds(cfg, 'val')
+        val_ds = strategy.experimental_distribute_dataset(val_ds)
 
     @tf.function
     def train_step(train_iterator):
@@ -138,9 +139,14 @@ def train(strategy, cfg):
             model.save(osp.join(cfg.MODEL.SAVE_DIR, '{}.h5'
                                 .format(cfg.MODEL.NAME)), save_format='h5')
 
+        if cfg.TRAIN.SAVE_META:
+            pickle.dump(meta_data, open(osp.join(cfg.MODEL.SAVE_DIR,
+                                                 '{}_meta.pkl'.format(cfg.MODEL.NAME)), 'wb'))
+
         if epoch > 1 and cfg.TRAIN.DISP:
             est_time = (cfg.TRAIN.EPOCHS - epoch) * (time() - te) / 3600
             print('Estimated time remaining: {:.2f} hrs'.format(est_time))
+
         epoch += 1
 
     meta_data['training_time'] = time() - ts
