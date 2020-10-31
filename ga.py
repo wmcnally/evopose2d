@@ -1,7 +1,6 @@
 import os
 import os.path as osp
 from multiprocessing import get_context
-
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 import tensorflow as tf
 tf.get_logger().setLevel('ERROR')
@@ -165,7 +164,6 @@ if __name__ == '__main__':
                                    genotype=genotype_from_blocks_args(DEFAULT_BLOCKS_ARGS),
                                    epochs=cfg.SEARCH.GEN0_EPOCHS, parent=None, disp=True)
             train_wrapper(train_cfg)
-            break
         else:
             # train next generation
             train_generation(copy.deepcopy(cfg), accelerators, meta_files, models, genotypes)
