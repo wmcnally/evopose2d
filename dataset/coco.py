@@ -42,6 +42,7 @@ cn.TRAIN.SEED = 0
 cn.TRAIN.WD = 1e-5
 cn.TRAIN.SAVE_EPOCHS = 0
 cn.TRAIN.SAVE_META = False
+cn.TRAIN.VAL = True
 
 cn.VAL = CN(new_allowed=True)
 cn.VAL.BATCH_SIZE = 64
@@ -49,6 +50,7 @@ cn.VAL.FLIP = True
 cn.VAL.DROP_REMAINDER = False
 cn.VAL.SCORE_THRESH = 0.2
 cn.VAL.DET = True
+cn.VAL.SAVE_BEST = False
 
 cn.MODEL = CN(new_allowed=True)
 cn.MODEL.TYPE = 'evopose'

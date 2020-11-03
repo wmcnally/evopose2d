@@ -85,7 +85,7 @@ def train(strategy, cfg):
     train_ds = strategy.experimental_distribute_dataset(train_ds)
     train_iterator = iter(train_ds)
 
-    if 'DIR' not in cfg.SEARCH:
+    if cfg.TRAIN.VAL:
         val_ds = load_tfds(cfg, 'val')
         val_ds = strategy.experimental_distribute_dataset(val_ds)
 
@@ -109,9 +109,9 @@ def train(strategy, cfg):
             val_loss.update_state(loss)
         strategy.run(step_fn, args=(dist_inputs,))
 
-    print('Training {} ({:.2f}M / {:.2f}G) for {} epochs'
+    print('Training {} ({:.2f}M / {:.2f}G) on {} for {} epochs'
           .format(cfg.MODEL.NAME, meta_data['parameters']/1e6,
-                  meta_data['flops']/2/1e9, cfg.TRAIN.EPOCHS))
+                  meta_data['flops']/2/1e9, cfg.TRAIN.ACCLERATOR, cfg.TRAIN.EPOCHS))
 
     epoch = 1
     ts = time()
@@ -124,13 +124,21 @@ def train(strategy, cfg):
                       .format(epoch, i + 1, spe, train_loss.result().numpy()))
         meta_data['train_loss'].append(train_loss.result().numpy())
 
-        if 'DIR' not in cfg.SEARCH:
+        if cfg.TRAIN.VAL:
             for i, batch in enumerate(val_ds):
                 val_step(batch)
                 if cfg.TRAIN.DISP:
                     print('val {} ({}/{}) | loss: {:.1f}'
                       .format(epoch, i + 1, spv, val_loss.result().numpy()))
             meta_data['val_loss'].append(val_loss.result().numpy())
+
+            if cfg.VAL.SAVE_BEST:
+                if epoch == 1:
+                    best_weights = model.get_weights()
+                    best_loss = val_loss.result().numpy()
+                elif val_loss.result().numpy() < best_loss:
+                    best_weights = model.get_weights()
+                    best_loss = val_loss.result().numpy()
 
         train_loss.reset_states()
         val_loss.reset_states()
@@ -150,6 +158,10 @@ def train(strategy, cfg):
         epoch += 1
 
     meta_data['training_time'] = time() - ts
+
+    if cfg.VAL.SAVE_BEST:
+        model.set_weights(best_weights)
+
     return model, meta_data
 
 
@@ -161,6 +173,10 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     tpu, strategy = detect_hardware(args.tpu)
+    if tpu:
+        cfg.TRAIN.ACCLERATOR = args.tpu
+    else:
+        cfg.TRAIN.ACCLERATOR = 'GPU'
     cfg.merge_from_file('configs/' + args.cfg)
     cfg.MODEL.NAME = args.cfg.split('.yaml')[0]
     model, meta_data = train(strategy, cfg)

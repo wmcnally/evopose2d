@@ -404,16 +404,7 @@ def transfer_params(parent, child, disp=False):
 
 if __name__ == '__main__':
     from dataset.coco import cn as cfg
-    # cfg.MODEL.GENOTYPE = genotype_from_blocks_args(DEFAULT_BLOCKS_ARGS)
-    cfg.MODEL.GENOTYPE = [
-        [3, 2, 2, 1],
-        [3, 4, 3, 2],
-        [5, 3, 5, 2],
-        [3, 3, 10, 2],
-        [5, 3, 14, 1],
-        [5, 4, 15, 1],
-        [3, 2, 7, 1]
-    ]
+    cfg.merge_from_file('../configs/evopose768_256x192_xs.yaml')
     model = EvoPose(cfg)
     model.summary()
     print('{:.2f}M / {:.2f}G'.format(model.count_params() / 1e6, get_flops(model) / 1e9 / 2))
