@@ -56,7 +56,7 @@ def train_generation(cfg, accelerators, meta_files, models, genotypes):
         parent_genotypes = [genotypes[0] for _ in range(cfg.SEARCH.CHILDREN)]
     else:
         fitness = [np.float32(m.split('_')[-1].split('.h5')[0]) for m in models]
-        parent_idx = np.argsort(fitness)[-cfg.SEARCH.PARENTS:]  # mu models with best fitness
+        parent_idx = np.argsort(fitness)[:cfg.SEARCH.PARENTS]  # mu models with best fitness (lowest loss)
         parents = [models[i] for i in parent_idx]
         print('Parents: {}'.format(parents))
         print('Cleaning up models that are not parents...')
