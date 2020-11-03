@@ -111,7 +111,7 @@ def train(strategy, cfg):
 
     print('Training {} ({:.2f}M / {:.2f}G) on {} for {} epochs'
           .format(cfg.MODEL.NAME, meta_data['parameters']/1e6,
-                  meta_data['flops']/2/1e9, cfg.TRAIN.ACCLERATOR, cfg.TRAIN.EPOCHS))
+                  meta_data['flops']/2/1e9, cfg.TRAIN.ACCELERATOR, cfg.TRAIN.EPOCHS))
 
     epoch = 1
     ts = time()
@@ -176,7 +176,7 @@ if __name__ == '__main__':
     if tpu:
         cfg.TRAIN.ACCLERATOR = args.tpu
     else:
-        cfg.TRAIN.ACCLERATOR = 'GPU'
+        cfg.TRAIN.ACCLERATOR = 'GPU/CPU'
     cfg.merge_from_file('configs/' + args.cfg)
     cfg.MODEL.NAME = args.cfg.split('.yaml')[0]
     model, meta_data = train(strategy, cfg)
