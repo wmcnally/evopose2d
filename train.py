@@ -174,9 +174,9 @@ if __name__ == '__main__':
 
     tpu, strategy = detect_hardware(args.tpu)
     if tpu:
-        cfg.TRAIN.ACCLERATOR = args.tpu
+        cfg.TRAIN.ACCELERATOR = args.tpu
     else:
-        cfg.TRAIN.ACCLERATOR = 'GPU/CPU'
+        cfg.TRAIN.ACCELERATOR = 'GPU/CPU'
     cfg.merge_from_file('configs/' + args.cfg)
     cfg.MODEL.NAME = args.cfg.split('.yaml')[0]
     model, meta_data = train(strategy, cfg)
