@@ -1,6 +1,7 @@
+from tensorflow.keras import layers, Model
 from tensorflow.keras.applications import ResNet50, ResNet101, ResNet152
 from tensorflow.keras.regularizers import l2
-from tensorflow.keras import layers, Model
+
 from utils import add_regularization, get_flops
 
 BACKBONES = {
@@ -45,7 +46,10 @@ def SimpleBaseline(cfg):
 
 if __name__ == '__main__':
     from dataset.coco import cn as cfg
-    cfg.merge_from_file('../configs/sb_resnet50_256x192_tpu.yaml')
+    cfg.merge_from_file('../configs/sb_resnet50_256x192.yaml')
+    cfg.DATASET.INPUT_SHAPE = [384, 288, 3]
+    cfg.MODEL.BACKBONE = 'resnet152'
     model = SimpleBaseline(cfg)
+    model.summary()
     print('{:.2f}M parameters | {:.2f}G multiply-adds'
           .format(model.count_params() / 1e6, get_flops(model) / 1e9 / 2))

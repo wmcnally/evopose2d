@@ -84,7 +84,7 @@ def transition(xs, out_channels, name=''):
     return xs_next
 
 
-def fuse_scales(xs, name=''):
+def fuse_scales(xs, name='', upsample='transpose'):
     if len(xs) == 1:
         return xs
 
@@ -94,9 +94,15 @@ def fuse_scales(xs, name=''):
         for j in range(len(xs)):
             x = xs[j]
             if j > i:
-                x = Conv2DTranspose(xs[i].shape[-1], 1, 2 ** (j - i), use_bias=False,
-                                    name=name + '/b{}{}_conv'.format(i, j))(x)
-                x = BatchNormalization(name=name + '/b{}{}_bn'.format(i, j))(x)
+                if upsample == 'transpose':
+                    x = Conv2DTranspose(xs[i].shape[-1], 1, 2 ** (j - i), use_bias=False,
+                                        name=name + '/b{}{}_conv'.format(i, j))(x)
+                    x = BatchNormalization(name=name + '/b{}{}_bn'.format(i, j))(x)
+                else:
+                    x = Conv2D(xs[i].shape[-1], 1, 1, use_bias=False,
+                               name=name + '/b{}{}_conv'.format(i, j))(x)
+                    x = BatchNormalization(name=name + '/b{}{}_bn'.format(i, j))(x)
+                    x = UpSampling2D(size=2 ** (j - i), interpolation='nearest')(x)
             elif j < i:
                 for k in range(i - j):
                     if k == i - j - 1:
@@ -123,7 +129,7 @@ def module(xs, stage_cfg, name=''):
             xs[i] = blocks_dict[stage_cfg['BLOCK']](
                 xs[i], stage_cfg['NUM_CHANNELS'][i],
                 name=name + '/b{}{}'.format(i, j))
-    xs = fuse_scales(xs, name=name + '/fusion')
+    xs = fuse_scales(xs, name=name + '/fusion', upsample=stage_cfg.UPSAMPLE)
     return xs
 
 
@@ -159,7 +165,8 @@ def HRNet(cfg):
 if __name__ == '__main__':
     from utils import get_flops
     from dataset.coco import cn as cfg
-    cfg.merge_from_file('../configs/hrnet_w32_256x192.yaml')
+    cfg.merge_from_file('../configs/hrnet_w48_384x288.yaml')
+    cfg.DATASET.INPUT_SHAPE = [256, 192, 3]
     model = HRNet(cfg)
     model.summary()
     print('{:.2f}M / {:.2f}G'.format(model.count_params() / 1e6, get_flops(model) / 1e9 / 2))
