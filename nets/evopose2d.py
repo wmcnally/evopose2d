@@ -204,7 +204,7 @@ def EvoPose(cfg):
 
     x = layers.Conv2D(
         keypoints,
-        3,
+        cfg.MODEL.FINAL_KERNEL,
         padding='same',
         use_bias=True,
         kernel_initializer=DENSE_KERNEL_INITIALIZER,
@@ -404,7 +404,7 @@ def transfer_params(parent, child, disp=False):
 
 if __name__ == '__main__':
     from dataset.coco import cn as cfg
-    cfg.merge_from_file('../configs/evopose768_256x192_xs.yaml')
+    cfg.merge_from_file('../configs/evopose768_512x384.yaml')
     model = EvoPose(cfg)
     model.summary()
     print('{:.2f}M / {:.2f}G'.format(model.count_params() / 1e6, get_flops(model) / 1e9 / 2))

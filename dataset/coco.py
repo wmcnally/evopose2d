@@ -64,6 +64,7 @@ cn.MODEL.ACTIVATION = 'swish'
 cn.MODEL.HEAD_KERNEL = 3
 cn.MODEL.HEAD_CHANNELS = 128
 cn.MODEL.HEAD_ACTIVATION = 'swish'
+cn.MODEL.FINAL_KERNEL = 3
 cn.MODEL.SAVE_DIR = 'models'
 
 cn.SEARCH = CN(new_allowed=True)
