@@ -144,8 +144,8 @@ def train(strategy, cfg):
         val_loss.reset_states()
 
         if cfg.TRAIN.SAVE_EPOCHS and epoch % cfg.TRAIN.SAVE_EPOCHS == 0:
-            model.save(osp.join(cfg.MODEL.SAVE_DIR, '{}.h5'
-                                .format(cfg.MODEL.NAME)), save_format='h5')
+            model.save(osp.join(cfg.MODEL.SAVE_DIR, '{}_ckpt{:03d}.h5'
+                                .format(cfg.MODEL.NAME, epoch)), save_format='h5')
 
         if cfg.TRAIN.SAVE_META:
             pickle.dump(meta_data, open(osp.join(cfg.MODEL.SAVE_DIR,
