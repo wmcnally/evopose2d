@@ -11,22 +11,24 @@ MODEL:
   ]
 
 TRAIN:
-  BATCH_SIZE: 512
+  BATCH_SIZE: 128
   EPOCHS: 200
   WARMUP_EPOCHS: 5
   LR_SCHEDULE: 'warmup_cosine_decay'
   SAVE_META: true
+  SAVE_EPOCHS: 10
 
 VAL:
-  BATCH_SIZE: 256
+  BATCH_SIZE: 128
   DROP_REMAINDER: True
   DET: True
+  SAVE_BEST: true
 
 DATASET:
+  INPUT_SHAPE: [512, 384, 3]
   TFRECORDS: 'gs://willmcnally1/TF2-SimpleHumanPose/tfrecords'
   ANNOT: '/home/willmcnally1/coco/annotations/person_keypoints_val2017.json'
   CACHE: true
   BFLOAT16: true
-  ROT_PROB: 1.
 
 
