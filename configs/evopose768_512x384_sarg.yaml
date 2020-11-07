@@ -1,0 +1,32 @@
+MODEL:
+  TYPE: 'evopose'
+  GENOTYPE: [
+    [ 3, 2, 2, 1 ],
+    [ 3, 4, 3, 2 ],
+    [ 5, 3, 5, 2 ],
+    [ 3, 3, 10, 2 ],
+    [ 5, 3, 14, 1 ],
+    [ 5, 4, 15, 2 ],
+    [ 3, 2, 7, 1 ]
+  ]
+
+TRAIN:
+  BATCH_SIZE: 16
+  EPOCHS: 200
+  WARMUP_EPOCHS: 5
+  LR_SCHEDULE: 'warmup_cosine_decay'
+  SAVE_META: true
+  SAVE_EPOCHS: 10
+
+VAL:
+  BATCH_SIZE: 16
+  DROP_REMAINDER: True
+  DET: True
+  SAVE_BEST: True
+
+DATASET:
+  INPUT_SHAPE: [512, 384, 3]
+  TFRECORDS: '/home/will/coco/tfrecords'
+  ANNOT: '/home/will/coco/annotations/person_keypoints_val2017.json'
+
+
