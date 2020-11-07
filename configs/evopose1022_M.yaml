@@ -12,7 +12,7 @@ MODEL:
   LOAD_WEIGHTS: false
 
 TRAIN:
-  BATCH_SIZE: 512
+  BATCH_SIZE: 256
   EPOCHS: 200
   WARMUP_EPOCHS: 5
   LR_SCHEDULE: 'warmup_cosine_decay'
