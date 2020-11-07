@@ -402,18 +402,20 @@ def transfer_params(parent, child, disp=False):
 
 
 if __name__ == '__main__':
-    # cfg.merge_from_file('../configs/evopose768_512x384_2.yaml')
-    # model = EvoPose(cfg)
+    from utils import get_flops
+    from dataset.coco import cn as cfg
+    cfg.merge_from_file('../configs/evopose768_384x288_L.yaml')
+    model = EvoPose(cfg)
     # # model.summary()
-    # print('{:.2f}M / {:.2f}G'.format(model.count_params() / 1e6, get_flops(model) / 1e9 / 2))
+    print('{:.2f}M / {:.2f}G'.format(model.count_params() / 1e6, get_flops(model) / 1e9 / 2))
 
     # search space size:
-    default_genotype = np.array(genotype_from_blocks_args(DEFAULT_BLOCKS_ARGS))
-    s = 2**default_genotype.shape[0] * 4 ** default_genotype.shape[0]  # kernel and repeats
-    for c in default_genotype[:, 2]:  # channels
-        s *= c
-    s *= 2**3  # stride
-    print('Search space size: 10^{:.0f}'.format(np.log10(s)))
+    # default_genotype = np.array(genotype_from_blocks_args(DEFAULT_BLOCKS_ARGS))
+    # s = 2**default_genotype.shape[0] * 4 ** default_genotype.shape[0]  # kernel and repeats
+    # for c in default_genotype[:, 2]:  # channels
+    #     s *= c
+    # s *= 2**3  # stride
+    # print('Search space size: 10^{:.0f}'.format(np.log10(s)))
 
     # np.random.seed(0)
     # cfg.MODEL.LOAD_WEIGHTS = False
