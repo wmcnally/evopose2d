@@ -14,7 +14,13 @@ BACKBONES = {
 def SimpleBaseline(cfg):
     regularizer = l2(cfg.TRAIN.WD)
 
+    if cfg.MODEL.LOAD_WEIGHTS:
+        weights = 'imagenet'
+    else:
+        weights = ''
+
     backbone = BACKBONES[cfg.MODEL.BACKBONE](
+        weights=weights,
         include_top=False,
         input_shape=cfg.DATASET.INPUT_SHAPE)
 
