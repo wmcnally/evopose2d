@@ -1,0 +1,33 @@
+MODEL:
+  TYPE: 'evopose'
+  FINAL_KERNEL: 1
+
+SEARCH:
+  CHILDREN: 64
+  PARENTS: 4
+  GEN0_EPOCHS: 30
+  EPOCHS: 5
+  TARGET: 5000000  # parameters
+  W: -0.07
+
+TRAIN:
+  BATCH_SIZE: 512
+  LR_SCHEDULE: 'warmup_cosine_decay'
+  WARMUP_EPOCHS: 0
+  VAL: true
+
+VAL:
+  BATCH_SIZE: 256
+  FLIP: false
+  DET: false
+  DROP_REMAINDER: true
+  SAVE_BEST: true
+
+DATASET:
+  TFRECORDS: 'gs://willmcnally1/TF2-SimpleHumanPose/tfrecords'
+  ANNOT: '/home/willmcnally1/coco/annotations/person_keypoints_val2017.json'
+  ROT_PROB: 0.
+  SCALE_FACTOR: 0.
+  BFLOAT16: true
+  CACHE: true
+
