@@ -383,6 +383,7 @@ def transfer_params(parent, child, disp=False):
 
             else:
                 # get last block with layer
+                print('Repeat block:', layer.name)
                 layer_name = '_'.join(layer.name.split('_')[1:])
                 blocks_layer = [p for p in sorted(parent_layers)
                               if layer_name == '_'.join(p.split('_')[1:])
@@ -404,7 +405,7 @@ def transfer_params(parent, child, disp=False):
 if __name__ == '__main__':
     from utils import get_flops
     from dataset.coco import cn as cfg
-    cfg.merge_from_file('../configs/evopose768_384x288_L.yaml')
+    cfg.merge_from_file('../configs/evopose768_384x288.yaml')
     model = EvoPose(cfg)
     # # model.summary()
     print('{:.2f}M / {:.2f}G'.format(model.count_params() / 1e6, get_flops(model) / 1e9 / 2))
