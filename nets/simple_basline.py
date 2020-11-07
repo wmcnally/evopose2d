@@ -17,7 +17,7 @@ def SimpleBaseline(cfg):
     if cfg.MODEL.LOAD_WEIGHTS:
         weights = 'imagenet'
     else:
-        weights = ''
+        weights = None
 
     backbone = BACKBONES[cfg.MODEL.BACKBONE](
         weights=weights,
