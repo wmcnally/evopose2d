@@ -17,10 +17,9 @@ TRAIN:
   WARMUP_EPOCHS: 5
   LR_SCHEDULE: 'warmup_cosine_decay'
   SAVE_META: true
-  SAVE_EPOCHS: 1
 
 VAL:
-  BATCH_SIZE: 512
+  BATCH_SIZE: 256
   DROP_REMAINDER: true
   DET: true
   SAVE_BEST: true
