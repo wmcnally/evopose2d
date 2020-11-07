@@ -7,7 +7,7 @@ from tensorflow.keras.applications import EfficientNetB0, EfficientNetB4, Effici
 from tensorflow.keras.models import load_model
 from tensorflow.keras.regularizers import l2
 import numpy as np
-from utils import get_flops, partial_weight_transfer
+from utils import partial_weight_transfer
 
 DEFAULT_BLOCKS_ARGS = [{
     'kernel_size': 3,
@@ -402,11 +402,18 @@ def transfer_params(parent, child, disp=False):
 
 
 if __name__ == '__main__':
-    from dataset.coco import cn as cfg
-    cfg.merge_from_file('../configs/evopose768_512x384_2.yaml')
-    model = EvoPose(cfg)
-    # model.summary()
-    print('{:.2f}M / {:.2f}G'.format(model.count_params() / 1e6, get_flops(model) / 1e9 / 2))
+    # cfg.merge_from_file('../configs/evopose768_512x384_2.yaml')
+    # model = EvoPose(cfg)
+    # # model.summary()
+    # print('{:.2f}M / {:.2f}G'.format(model.count_params() / 1e6, get_flops(model) / 1e9 / 2))
+
+    # search space size:
+    default_genotype = np.array(genotype_from_blocks_args(DEFAULT_BLOCKS_ARGS))
+    s = 2**default_genotype.shape[0] * 4 ** default_genotype.shape[0]  # kernel and repeats
+    for c in default_genotype[:, 2]:  # channels
+        s *= c
+    s *= 2**3  # stride
+    print('Search space size: 10^{:.0f}'.format(np.log10(s)))
 
     # np.random.seed(0)
     # cfg.MODEL.LOAD_WEIGHTS = False
