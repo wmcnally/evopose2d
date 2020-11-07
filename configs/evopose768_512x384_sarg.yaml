@@ -28,5 +28,6 @@ DATASET:
   INPUT_SHAPE: [512, 384, 3]
   TFRECORDS: '/home/will/coco/tfrecords'
   ANNOT: '/home/will/coco/annotations/person_keypoints_val2017.json'
+  CACHE: true
 
 
