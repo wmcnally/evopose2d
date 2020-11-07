@@ -136,9 +136,11 @@ def train(strategy, cfg):
                 if epoch == 1:
                     best_weights = model.get_weights()
                     best_loss = val_loss.result().numpy()
+                    print('Cached model weights')
                 elif val_loss.result().numpy() < best_loss:
                     best_weights = model.get_weights()
                     best_loss = val_loss.result().numpy()
+                    print('Cached model weights')
 
         train_loss.reset_states()
         val_loss.reset_states()
@@ -146,6 +148,8 @@ def train(strategy, cfg):
         if cfg.TRAIN.SAVE_EPOCHS and epoch % cfg.TRAIN.SAVE_EPOCHS == 0:
             model.save(osp.join(cfg.MODEL.SAVE_DIR, '{}_ckpt{:03d}.h5'
                                 .format(cfg.MODEL.NAME, epoch)), save_format='h5')
+            print('Saved checkpoint to', osp.join(cfg.MODEL.SAVE_DIR, '{}_ckpt{:03d}.h5'
+                                            .format(cfg.MODEL.NAME, epoch)))
 
         if cfg.TRAIN.SAVE_META:
             pickle.dump(meta_data, open(osp.join(cfg.MODEL.SAVE_DIR,
