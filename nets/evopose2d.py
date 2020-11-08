@@ -214,7 +214,10 @@ def EvoPose(cfg):
 
     if cfg.MODEL.LOAD_WEIGHTS:
         if cfg.MODEL.PARENT is None:
-            parent = get_parent(cfg.DATASET.INPUT_SHAPE)
+            if cfg.MODEL.B0_WEIGHTS:
+                parent = get_parent((256, 192, 3))
+            else:
+                parent = get_parent(cfg.DATASET.INPUT_SHAPE)
         else:
             parent = load_model(cfg.MODEL.PARENT, compile=False)
         if parent is not None:
@@ -405,7 +408,7 @@ def transfer_params(parent, child, disp=False):
 if __name__ == '__main__':
     from utils import get_flops
     from dataset.coco import cn as cfg
-    cfg.merge_from_file('../configs/evopose768_384x288.yaml')
+    cfg.merge_from_file('../configs/evopose1022_L.yaml')
     model = EvoPose(cfg)
     # # model.summary()
     print('{:.2f}M / {:.2f}G'.format(model.count_params() / 1e6, get_flops(model) / 1e9 / 2))
