@@ -12,6 +12,7 @@ import json
 import cv2
 from utils import detect_hardware, suppress_stdout
 from dataset.coco import cn as cfg
+import pickle
 
 
 def get_preds(hms, Ms, input_shape, output_shape):
@@ -123,12 +124,14 @@ if __name__ == '__main__':
     parser.add_argument('--ckpt', default=None)
     args = parser.parse_args()
 
-    cfg.merge_from_file('configs/' + args.cfg)
-    cfg.MODEL.NAME = args.cfg.split('.yaml')[0]
-    if args.ckpt:
-        cfg.MODEL.NAME += '_{}'.format(args.ckpt)
-    if args.det >= 0:
-        cfg.VAL.DET = bool(args.det)
-    tpu, strategy = detect_hardware(args.tpu)
-    AP = validate(strategy, cfg)
-    print('AP: {:.5f}'.format(AP))
+    cfg = pickle.load(open('models/{}_meta.pkl'.format(args.cfg.split('.yaml')[0])))['config']
+    print(cfg)
+    # cfg.merge_from_file('configs/' + args.cfg)
+    # cfg.MODEL.NAME = args.cfg.split('.yaml')[0]
+    # if args.ckpt:
+    #     cfg.MODEL.NAME += '_{}'.format(args.ckpt)
+    # if args.det >= 0:
+    #     cfg.VAL.DET = bool(args.det)
+    # tpu, strategy = detect_hardware(args.tpu)
+    # AP = validate(strategy, cfg)
+    # print('AP: {:.5f}'.format(AP))
