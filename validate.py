@@ -124,7 +124,7 @@ if __name__ == '__main__':
     parser.add_argument('--ckpt', default=None)
     args = parser.parse_args()
 
-    cfg = pickle.load(open('models/{}_meta.pkl'.format(args.cfg.split('.yaml')[0])))['config']
+    cfg = pickle.load(open('models/{}_meta.pkl'.format(args.cfg.split('.yaml')[0]), 'rb'))['config']
     print(cfg)
     # cfg.merge_from_file('configs/' + args.cfg)
     # cfg.MODEL.NAME = args.cfg.split('.yaml')[0]
