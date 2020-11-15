@@ -5,6 +5,7 @@ import os.path as osp
 import numpy as np
 import json
 import tensorflow as tf
+import sys
 
 
 def _bytes_feature(value):
@@ -35,7 +36,8 @@ def tf_example(sample_dict):
     return tf.train.Example(features=tf.train.Features(feature=features))
 
 
-def load_data(annot_path, det_path=None):
+def load_data(annot_path, det_path=None, split='train'):
+
     coco = COCO(annot_path)
     coco_path = '/'.join(annot_path.split('/')[:-2])
 
@@ -45,15 +47,14 @@ def load_data(annot_path, det_path=None):
         for aid in coco.anns.keys():
             ann = coco.anns[aid]
             joints = ann['keypoints']
-            if 'train' in annot_path:
+            if split == 'train':
                 if (ann['image_id'] not in coco.imgs) or ann['iscrowd'] or (np.sum(joints[2::3]) == 0) or (
                         ann['num_keypoints'] == 0):
                     continue
-                img_name = 'train2017/' + coco.imgs[ann['image_id']]['file_name']
             else:
                 if ann['image_id'] not in coco.imgs:
                     continue
-                img_name = 'val2017/' + coco.imgs[ann['image_id']]['file_name']
+            img_name = '{}2017/'.format(split) + coco.imgs[ann['image_id']]['file_name']
 
             # sanitize bboxes
             x, y, w, h = ann['bbox']
@@ -79,7 +80,7 @@ def load_data(annot_path, det_path=None):
         for det in dets:
             if det['image_id'] not in coco.imgs or det['category_id'] != 1:
                 continue
-            img_name = 'val2017/' + coco.imgs[det['image_id']]['file_name']
+            img_name = '{}2017/'.format(split) + coco.imgs[det['image_id']]['file_name']
             d = dict(img_id=det['image_id'],
                      img_path=osp.join(coco_path, 'images', img_name),
                      bbox=det['bbox'],
@@ -96,22 +97,23 @@ if __name__ == '__main__':
     parser.add_argument('--write-dir', default='/media/wmcnally/data/coco/tfrecords')
     parser.add_argument('--splits', nargs='+', default=['train', 'val'])
     parser.add_argument('--shard-size', type=int, default=1024)
-    parser.add_argument('--det-path', default=None)
+    parser.add_argument('--dets', default=None)
     args = parser.parse_args()
+
+    annot_dict = {
+        'train': osp.join(args.coco_path, 'annotations/person_keypoints_train2017.json'),
+        'val': osp.join(args.coco_path, 'annotations/person_keypoints_val2017.json'),
+        'test': osp.join(args.coco_path, 'annotations/image_info_test-dev2017.json'),
+    }
 
     for split in args.splits:
         write_subdir = osp.join(args.write_dir, split)
-        if args.det_path is not None:
-            assert split == 'val', "Must set split to 'val' if using dets"
-            data = load_data(osp.join(args.coco_path,
-                                      'annotations',
-                                      'person_keypoints_val2017.json'),
-                             det_path=args.det_path)
-            write_subdir = osp.join(write_subdir, 'dets')
-        else:
-            data = load_data(osp.join(args.coco_path,
-                                      'annotations',
-                                      'person_keypoints_{}2017.json'.format(split)))
+        if args.dets is not None:
+            assert split in ['val', 'test'], "Split must be in ['val', 'test-dev'] if using dets"
+            if split == 'val':
+                write_subdir = osp.join(write_subdir, 'dets')
+
+        data = load_data(annot_dict[split], det_path=args.dets, split=split)
         os.makedirs(write_subdir, exist_ok=True)
 
         i = 0
@@ -120,10 +122,10 @@ if __name__ == '__main__':
             record_path = osp.join(write_subdir, '{:05d}.tfrecord'.format(shard_count))
             with tf.io.TFRecordWriter(record_path) as writer:
                 for j in range(args.shard_size):
-                    if args.det_path:
+                    if args.dets:
                         if i >= len(data):
                             # write extra samples to fill the shard so we don't have to
-                            # drop any samples when testing on TPU (batch size <= shard size)
+                            # drop any samples when testing on TPU
                             example = tf_example(data[-1])
                         else:
                             example = tf_example(data[i])
