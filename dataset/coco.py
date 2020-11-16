@@ -55,7 +55,6 @@ cn.VAL.SAVE_BEST = False
 cn.MODEL = CN(new_allowed=True)
 cn.MODEL.TYPE = 'evopose'
 cn.MODEL.LOAD_WEIGHTS = True
-cn.MODEL.B0_WEIGHTS = False
 cn.MODEL.PARENT = None
 cn.MODEL.GENOTYPE = None
 cn.MODEL.WIDTH_COEFFICIENT = 1.

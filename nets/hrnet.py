@@ -165,8 +165,8 @@ def HRNet(cfg):
 if __name__ == '__main__':
     from utils import get_flops
     from dataset.coco import cn as cfg
-    cfg.merge_from_file('../configs/hrnet_w48_384x288.yaml')
-    cfg.DATASET.INPUT_SHAPE = [256, 192, 3]
+    cfg.merge_from_file('../configs/hrnet_w32_256x192.yaml')
+    # cfg.DATASET.INPUT_SHAPE = [256, 192, 3]
     model = HRNet(cfg)
-    model.summary()
+    # model.summary()
     print('{:.2f}M / {:.2f}G'.format(model.count_params() / 1e6, get_flops(model) / 1e9 / 2))
