@@ -6,8 +6,9 @@ Implemented using Python 3.7 and TensorFlow 2.3.
 
 ## Getting Started
 1. If you haven't already, [install Anaconda or Miniconda](https://docs.conda.io/projects/conda/en/latest/user-guide/install/index.html)
-2. Create a new conda environment with Python 3.7: ```conda create -n evopose2d python==3.7```
-3. Install the dependencies using ```$pip install -r requirements.txt```.
+2. Create a new conda environment with Python 3.7: ```$ conda create -n evopose2d python==3.7```
+3. Install the dependencies using ```$ pip install -r requirements.txt```.
+4. Clone this repo: ```$ git clone https://github.com/wmcnally/evopose2d.git```
 
 ## Validation / Testing
 1. Download a pretrained model: [[bfloat16](https://drive.google.com/drive/folders/1lPXkml5icmKLOGr3o2FQsHEPPe7Du_cH?usp=sharing), float32 (coming soon)] and place it in a new ```models``` directory. The bfloat16 models run best on TPU, and might be slow on older GPUs. 
