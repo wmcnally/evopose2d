@@ -24,8 +24,8 @@ Coming soon
 
 ## Acknowledgements
 Funding:
-- Dr. McPhee's Tier 1 Canada Research Chair in Biomechatronic System Dynamics
-- Dr. Wong's Tier 2 Canada Research Chair in Artificial Intelligence and Medical Imaging
+- Dr. McPhee's Canada Research Chair in Biomechatronic System Dynamics
+- Dr. Wong's Canada Research Chair in Artificial Intelligence and Medical Imaging
 - The Natural Sciences and Engineering Research Council of Canada (NSERC)
 - Google Cloud Academic Research Grant
 
