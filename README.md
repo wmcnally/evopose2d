@@ -22,7 +22,7 @@ Coming soon
 ## Neuroevolution
 Coming soon
 
-##Acknowledgements
+## Acknowledgements
 Funding:
 - Dr. McPhee's Tier 1 Canada Research Chair in Biomechatronic System Dynamics
 - Dr. Wong's Tier 2 Canada Research Chair in Artificial Intelligence and Medical Imaging
