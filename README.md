@@ -22,11 +22,6 @@ Coming soon
 ## Neuroevolution
 Coming soon
 
-
-
-
- 
-
 ##Acknowledgements
 Funding:
 - Dr. McPhee's Tier 1 Canada Research Chair in Biomechatronic System Dynamics
