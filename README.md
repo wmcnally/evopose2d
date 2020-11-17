@@ -15,7 +15,7 @@ Implemented using Python 3.7 and TensorFlow 2.3.
 4. Download the [person detections](https://drive.google.com/drive/folders/1fRUDNUDxe9fjqcRZ2bnF_TKMlO0nB_dk?usp=sharing) (from HRNet repo). 
 5. Use [write_tfrecords.py](./write_tfrecords.py) and the detection json to generate the validation / test TFRecords. If using Google Cloud, upload the TFRecords to a Storage Bucket. 
 6. Modify the corresponding ```.yaml``` file in [configs](./configs) to point to the directory containing the TFRecords, as well as the validation annotation json. Modify the validation batch size as per your hardware constraints. If you are not using TPU, set the bfloat16 attribute to 'false'.  
-
+7. If using GPU: ```$ python3 validate.py ```
 
 ## Training
 Coming soon
