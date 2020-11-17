@@ -18,6 +18,7 @@ Implemented using Python 3.7 and TensorFlow 2.3.
 6. Modify the paths to the TFRecords and validation annotation json in the [config](./configs) file corresponding to the model you are testing. If using GPU, change the validation batch size to suit your total GPU memory and set bfloat16 to 'false'.
 
 **GPU:** ```$ python3 validate.py -c [model_name].yaml```
+
 **Cloud TPU:** ```$ python3 validate.py -c [model_name].yaml --tpu [tpu_name]```
 
 ## Training
