@@ -124,7 +124,7 @@ def train_wrapper(cfg):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('-c', '--cfg', default='s0.yaml')
+    parser.add_argument('-c', '--cfg', default='E3.yaml')
     parser.add_argument('--accelerator-prefix', default='node-')
     parser.add_argument('-a', '--accelerator-ids', type=int, nargs='+', default=[0])
     parser.add_argument('-ar', '--accelerator-range', type=int, nargs='+', default=None)
