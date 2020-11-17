@@ -17,8 +17,8 @@ Implemented using Python 3.7 and TensorFlow 2.3.
 5. Use [write_tfrecords.py](./write_tfrecords.py) and the detection json to generate the validation / test TFRecords. If using Cloud TPU, upload the TFRecords to a Storage Bucket. 
 6. Modify the paths to the TFRecords and validation annotation json in the [config](./configs) file corresponding to the model you are testing. If using GPU, change the validation batch size to suit your total GPU memory and set bfloat16 to 'false'.
 
-##### GPU: ```$ python3 validate.py -c [model_name].yaml```
-##### Cloud TPU: ```$ python3 validate.py -c [model_name].yaml --tpu [tpu_name]```
+**GPU:** ```$ python3 validate.py -c [model_name].yaml```
+**Cloud TPU:** ```$ python3 validate.py -c [model_name].yaml --tpu [tpu_name]```
 
 ## Training
 Coming soon
