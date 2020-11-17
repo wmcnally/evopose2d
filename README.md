@@ -13,9 +13,11 @@ Implemented using Python 3.7 and TensorFlow 2.3.
 2. Download the COCO 2017 [validation](http://images.cocodataset.org/zips/val2017.zip) / [test](http://images.cocodataset.org/zips/test2017.zip) images.
 3. Download the [validation](http://images.cocodataset.org/annotations/annotations_trainval2017.zip) / [test](http://images.cocodataset.org/annotations/image_info_test2017.zip) annotations.
 4. Download the [person detections](https://drive.google.com/drive/folders/1fRUDNUDxe9fjqcRZ2bnF_TKMlO0nB_dk?usp=sharing) (from HRNet repo). 
-5. Use [write_tfrecords.py](./write_tfrecords.py) and the detection json to generate the validation / test TFRecords. If using Google Cloud, upload the TFRecords to a Storage Bucket. 
-6. Modify the corresponding ```.yaml``` file in [configs](./configs) to point to the directory containing the TFRecords, as well as the validation annotation json. Modify the validation batch size as per your hardware constraints. If you are not using TPU, set the bfloat16 attribute to 'false'.  
-7. If using GPU: ```$ python3 validate.py ```
+5. Use [write_tfrecords.py](./write_tfrecords.py) and the detection json to generate the validation / test TFRecords. If using Cloud TPU, upload the TFRecords to a Storage Bucket. 
+6. Modify the paths to the TFRecords and validation annotation json in the [config](./configs) file corresponding to the model you are testing. If using GPU, change the validation batch size to suit your total GPU memory and set bfloat16 to 'false'.
+
+##### GPU: ```$ python3 validate.py -c [model_name].yaml```
+##### Cloud TPU: ```$ python3 validate.py -c [model_name].yaml --tpu [tpu_name]```
 
 ## Training
 Coming soon

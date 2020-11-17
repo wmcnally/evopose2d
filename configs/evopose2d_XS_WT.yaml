@@ -20,7 +20,7 @@ TRAIN:
   SAVE_META: true
 
 VAL:
-  BATCH_SIZE: 256
+  BATCH_SIZE: 512
   DROP_REMAINDER: true
   DET: true
 
