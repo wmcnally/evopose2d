@@ -93,8 +93,8 @@ def load_data(annot_path, det_path=None, split='train'):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--coco-path', default='/media/wmcnally/data/coco')
-    parser.add_argument('--write-dir', default='/media/wmcnally/data/coco/tfrecords')
+    parser.add_argument('--coco-path', default='/media/user/data/coco')
+    parser.add_argument('--write-dir', default='/media/user/data/coco/tfrecords')
     parser.add_argument('--splits', nargs='+', default=['train', 'val'])
     parser.add_argument('--shard-size', type=int, default=1024)
     parser.add_argument('--dets', default=None)

@@ -4,8 +4,8 @@ cn = CN(new_allowed=True)
 
 cn.DATASET = CN(new_allowed=True)
 cn.DATASET.NAME = 'COCO'
-cn.DATASET.TFRECORDS = '/media/wmcnally/data/coco/TF2-SimpleHumanPose/tfrecords'
-cn.DATASET.ANNOT = '/media/wmcnally/data/coco/annotations/person_keypoints_val2017.json'
+cn.DATASET.TFRECORDS = '/media/user/data/coco/TF2-SimpleHumanPose/tfrecords'
+cn.DATASET.ANNOT = '/media/user/data/coco/annotations/person_keypoints_val2017.json'
 cn.DATASET.TRAIN_SAMPLES = 149813
 cn.DATASET.VAL_SAMPLES = 11004
 cn.DATASET.KP_FLIP = [0, 2, 1, 4, 3, 6, 5, 8, 7, 10, 9, 12, 11, 14, 13, 16, 15]
