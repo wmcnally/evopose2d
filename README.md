@@ -22,13 +22,14 @@ Modify the paths to the TFRecords and validation annotation json in the [config]
 **Cloud TPU:** ```$ python3 validate.py -c [model_name].yaml --split [val/test] --tpu [tpu_name]```
 
 ## Training
-Modify the paths to the TFRecords in the [config](./configs) file corresponding to the model you are training. If using GPU, change the training and validation batch sizes to suit your total GPU memory and set bfloat16 to 'false'.
+Modify the paths to the TFRecords and validation annotation json in the [config](./configs) file corresponding to the model you are training. If using GPU, change the training and validation batch sizes to suit your total GPU memory and set bfloat16 to 'false'.
 
 **GPU:** ```$ python3 train.py -c [model_name].yaml```
 
 **Cloud TPU:** ```$ python3 train.py -c [model_name].yaml --tpu [tpu_name]```
 
 ## Neuroevolution
+Modify the paths to the TFRecords and validation annotation json in [E3.yaml](./configs/E3.yaml).
 To run on 4 Cloud TPUs, e.g., with names [node-1, node-2, node-3, node-4]: ```$ python3 ga.py -c E3.yaml -a 1 2 3 4```
 
 See [ga.py](./ga.py) arguments for more details. 
