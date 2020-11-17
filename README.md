@@ -2,6 +2,7 @@
 Source code for EvoPose2D: Pushing the Boundaries of 2D Human Pose Estimation using Neuroevolution.
 Implemented using Python 3.7 and TensorFlow 2.3.
 
+**Proof of results**: The json files containing the results reported in the paper can be found [here](https://drive.google.com/drive/folders/1iO_EVuIYQP1BHG6A0hWaAmD52PA3C7HI?usp=sharing).
 ## Getting Started
 1. If you haven't already, [install Anaconda or Miniconda](https://docs.conda.io/projects/conda/en/latest/user-guide/install/index.html)
 2. Create a new conda environment with Python 3.7: ```$ conda create -n evopose2d python==3.7```
@@ -9,7 +10,7 @@ Implemented using Python 3.7 and TensorFlow 2.3.
 4. Clone this repo: ```$ git clone https://github.com/wmcnally/evopose2d.git```
 
 ## Validation / Testing
-1. Download a pretrained model: [[bfloat16](https://drive.google.com/drive/folders/1lPXkml5icmKLOGr3o2FQsHEPPe7Du_cH?usp=sharing), float32 (coming soon)] and place it in a new ```models``` directory. The bfloat16 models run best on TPU, and might be slow on older GPUs. 
+1. Download a pretrained model: [[bfloat16](https://drive.google.com/drive/folders/1ec_reidopAuyST9VtCMexbCdZ10hnrJi?usp=sharing), float32 (coming soon)] and place it in a new ```models``` directory. The bfloat16 models run best on TPU, and might be slow on older GPUs. 
 2. Download the COCO 2017 [validation](http://images.cocodataset.org/zips/val2017.zip) / [test](http://images.cocodataset.org/zips/test2017.zip) images.
 3. Download the [validation](http://images.cocodataset.org/annotations/annotations_trainval2017.zip) / [test](http://images.cocodataset.org/annotations/image_info_test2017.zip) annotations.
 4. Download the [person detections](https://drive.google.com/drive/folders/1fRUDNUDxe9fjqcRZ2bnF_TKMlO0nB_dk?usp=sharing) (from HRNet repo). 
