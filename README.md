@@ -29,7 +29,9 @@ Modify the paths to the TFRecords in the [config](./configs) file corresponding 
 **Cloud TPU:** ```$ python3 train.py -c [model_name].yaml --tpu [tpu_name]```
 
 ## Neuroevolution
-Coming soon
+To run on 4 Cloud TPUs, e.g., with names [node-1, node-2, node-3, node-4]: ```$ python3 ga.py -a 1 2 3 4```
+
+See [ga.py](./ga.py) arguments for more details. 
 
 ## Acknowledgements
 
