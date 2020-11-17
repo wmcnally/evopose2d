@@ -30,6 +30,7 @@ Modify the paths to the TFRecords and validation annotation json in the [config]
 
 ## Neuroevolution
 Modify the paths to the TFRecords and validation annotation json in [E3.yaml](./configs/E3.yaml).
+
 To run on 4 Cloud TPUs, e.g., with names [node-1, node-2, node-3, node-4]: ```$ python3 ga.py -c E3.yaml -a 1 2 3 4```
 
 See [ga.py](./ga.py) arguments for more details. 
