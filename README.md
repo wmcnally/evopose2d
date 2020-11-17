@@ -2,8 +2,6 @@
 Source code for EvoPose2D: Pushing the Boundaries of 2D Human Pose Estimation using Neuroevolution.
 Implemented using Python 3.7 and TensorFlow 2.3.
 
-**Proof of results:** The json files containing the results reported in the paper are provided [here](https://drive.google.com/drive/folders/1nNrB0o7Uo7gpGE3_F3L2Ukn9R47PIRrF?usp=sharing). 
-
 ## Getting Started
 1. If you haven't already, [install Anaconda or Miniconda](https://docs.conda.io/projects/conda/en/latest/user-guide/install/index.html)
 2. Create a new conda environment with Python 3.7: ```$ conda create -n evopose2d python==3.7```
