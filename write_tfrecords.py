@@ -109,7 +109,7 @@ if __name__ == '__main__':
     for split in args.splits:
         write_subdir = osp.join(args.write_dir, split)
         if args.dets is not None:
-            assert split in ['val', 'test'], "Split must be in ['val', 'test-dev'] if using dets"
+            assert split in ['val', 'test'], "Split must be in ['val', 'test'] if using dets"
             if split == 'val':
                 write_subdir = osp.join(write_subdir, 'dets')
 
