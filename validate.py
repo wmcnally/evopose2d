@@ -129,10 +129,12 @@ if __name__ == '__main__':
     parser.add_argument('--split', default='val')
     args = parser.parse_args()
 
-    from dataset.coco import cn as cfg
-    cfg.merge_from_file('configs/' + args.cfg)
-    cfg.MODEL.NAME = args.cfg.split('.')[0]
-    # cfg = pickle.load(open('models/{}_meta.pkl'.format(args.cfg.split('.yaml')[0]), 'rb'))['config']
+    # from dataset.coco import cn as cfg
+    # cfg.merge_from_file('configs/' + args.cfg)
+    # cfg.MODEL.NAME = args.cfg.split('.')[0]
+
+    cfg = pickle.load(open('models/{}_meta.pkl'.format(args.cfg.split('.yaml')[0]), 'rb'))['config']
+
     if args.ckpt:
         cfg.MODEL.NAME += '_{}'.format(args.ckpt)
     if args.det >= 0:
