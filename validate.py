@@ -52,6 +52,7 @@ def validate(strategy, cfg, model=None, split='val'):
         with strategy.scope():
             model = tf.keras.models.load_model(
                 osp.join(cfg.MODEL.SAVE_DIR, cfg.MODEL.NAME + '.h5'), compile=False)
+    cfg.MODEL.OUTPUT_SHAPE = model.output_shape[1:]
 
     ds = load_tfds(cfg, split, det=cfg.VAL.DET,
                    predict_kp=True, drop_remainder=cfg.VAL.DROP_REMAINDER)
