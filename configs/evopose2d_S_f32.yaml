@@ -1,0 +1,34 @@
+MODEL:
+  TYPE: 'evopose'
+  GENOTYPE: [
+    [ 3, 1, 2, 1 ],
+    [ 3, 3, 3, 2 ],
+    [ 5, 2, 5, 2 ],
+    [ 3, 4, 10, 2 ],
+    [ 5, 2, 14, 1 ],
+    [ 5, 4, 16, 1 ],
+    [ 3, 2, 10, 1 ]
+  ]
+  LOAD_WEIGHTS: false
+  FINAL_KERNEL: 1
+
+TRAIN:
+  BATCH_SIZE: 256
+  EPOCHS: 200
+  WARMUP_EPOCHS: 5
+  LR_SCHEDULE: 'warmup_cosine_decay'
+  SAVE_META: true
+
+VAL:
+  BATCH_SIZE: 256
+  DROP_REMAINDER: true
+  DET: true
+
+DATASET:
+  INPUT_SHAPE: [256, 192, 3]
+  TFRECORDS: 'gs://bucket/TF2-SimpleHumanPose/tfrecords'
+  ANNOT: '/home/user/coco/annotations/person_keypoints_val2017.json'
+  CACHE: true
+  BFLOAT16: false
+
+

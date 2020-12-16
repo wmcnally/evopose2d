@@ -15,7 +15,7 @@ These results were generated using the bfloat16 models.
 7. Use [write_tfrecords.py](./write_tfrecords.py) and the detection json to generate the training and validation TFRecords. If using Cloud TPU, upload the TFRecords to a Storage Bucket. 
 
 ## Validation
-Download a pretrained model: [[bfloat16](https://drive.google.com/drive/folders/1ec_reidopAuyST9VtCMexbCdZ10hnrJi?usp=sharing), [float32](https://drive.google.com/drive/folders/1dIiXdGMhJzEu_CW6ZBgiaOqQcixS7nvV?usp=sharing) (more coming soon)] and place it in a new ```models``` directory. The bfloat16 models run best on TPU, and might be slow on older GPUs. 
+Download a pretrained model from [here](https://drive.google.com/drive/folders/1neywqc7OC5dRErQJFCnCor5fphkKCzHh?usp=sharing) and place it in a new ```models``` directory. The bfloat16 models run best on TPU, and might be slow on older GPUs. 
 
 Modify the paths to the TFRecords and validation annotation json in the [config](./configs) file. If using GPU, change the validation batch size to suit your total GPU memory and set bfloat16 to 'false'.
 
