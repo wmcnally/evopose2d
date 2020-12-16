@@ -53,7 +53,7 @@ def validate(strategy, cfg, model=None, split='val'):
             model = tf.keras.models.load_model(
                 osp.join(cfg.MODEL.SAVE_DIR, cfg.MODEL.NAME + '.h5'), compile=False)
 
-    cfg.MODEL.OUTPUT_SHAPE = model.output_shape[1:]
+    cfg.DATASET.OUTPUT_SHAPE = model.output_shape[1:]
     cfg.DATASET.SIGMA = 2 * cfg.DATASET.OUTPUT_SHAPE[0] / 64
 
     ds = load_tfds(cfg, split, det=cfg.VAL.DET,
@@ -129,11 +129,9 @@ if __name__ == '__main__':
     parser.add_argument('--split', default='val')
     args = parser.parse_args()
 
-    # from dataset.coco import cn as cfg
-    # cfg.merge_from_file('configs/' + args.cfg)
-    # cfg.MODEL.NAME = args.cfg.split('.')[0]
-
-    cfg = pickle.load(open('models/{}_meta.pkl'.format(args.cfg.split('.yaml')[0]), 'rb'))['config']
+    from dataset.coco import cn as cfg
+    cfg.merge_from_file('configs/' + args.cfg)
+    cfg.MODEL.NAME = args.cfg.split('.')[0]
 
     if args.ckpt:
         cfg.MODEL.NAME += '_{}'.format(args.ckpt)
