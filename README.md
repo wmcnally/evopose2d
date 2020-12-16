@@ -17,14 +17,14 @@ These results were generated using the bfloat16 models.
 ## Validation
 Download a pretrained model from [here](https://drive.google.com/drive/folders/1neywqc7OC5dRErQJFCnCor5fphkKCzHh?usp=sharing) and place it in a new ```models``` directory. The bfloat16 models run best on TPU, and might be slow on older GPUs. 
 
-Modify the paths to the TFRecords and validation annotation json in the [config](./configs) file. If using GPU, change the validation batch size to suit your total GPU memory and set bfloat16 to 'false'.
+Modify the paths to the TFRecords and validation annotation json in the [yaml](./configs) file of the model you downloaded. If using GPU, change the validation batch size to suit your total GPU memory.
 
 **GPU:** ```$ python3 validate.py -c [model_name].yaml```
 
 **Cloud TPU:** ```$ python3 validate.py -c [model_name].yaml --tpu [tpu_name]```
 
 ## Training
-Modify the paths to the TFRecords and validation annotation json in the [config](./configs) file. If using GPU, change the training and validation batch sizes to suit your total GPU memory and set bfloat16 to 'false'.
+Modify the paths to the TFRecords and validation annotation json in the [yaml](./configs) file of the model you want to train. If using GPU, change the training and validation batch sizes to suit your total GPU memory and set bfloat16 to 'false'.
 
 **GPU:** ```$ python3 train.py -c [model_name].yaml```
 
