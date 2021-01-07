@@ -14,6 +14,13 @@ These results were generated using the bfloat16 models.
 6. Download the validation person [detections](https://drive.google.com/drive/folders/1fRUDNUDxe9fjqcRZ2bnF_TKMlO0nB_dk?usp=sharing) (from HRNet repo). 
 7. Use [write_tfrecords.py](./write_tfrecords.py) and the detection json to generate the training and validation TFRecords. If using Cloud TPU, upload the TFRecords to a Storage Bucket. 
 
+
+## Demo
+1. Download a pretrained float32 model from [here](https://drive.google.com/drive/folders/1neywqc7OC5dRErQJFCnCor5fphkKCzHh?usp=sharing) and place it in a new ```models``` directory.
+2. Run ```$ python3 demo.py -c [model_name].yaml -p [/path/to/coco/dataset]``` The test image result will be written to the main directory.
+
+![alt text](./demo_img.jpg)
+
 ## Validation
 Download a pretrained model from [here](https://drive.google.com/drive/folders/1neywqc7OC5dRErQJFCnCor5fphkKCzHh?usp=sharing) and place it in a new ```models``` directory. The bfloat16 models run best on TPU, and might be slow on GPU. 
 
