@@ -17,8 +17,11 @@ These results were generated using the bfloat16 models.
 
 ## Demo
 1. Download a pretrained float32 model from [here](https://drive.google.com/drive/folders/1neywqc7OC5dRErQJFCnCor5fphkKCzHh?usp=sharing) and place it in a new ```models``` directory.
-2. Run ```$ python3 demo.py -c [model_name].yaml -p [/path/to/coco/dataset]``` The test image result will be written to the main directory. ![alt text](./demo_img.jpg)
-Result visualization for image id 785 using evopose2d_M_f32 model.
+2. Run ```$ python3 demo.py -c [model_name].yaml -p [/path/to/coco/dataset]``` The test image result will be written to the main directory. 
+
+Prediction visualization for image id 785 using evopose2d_M_f32 model:
+![alt text](./demo_img.jpg)
+
 
 ## Validation
 Download a pretrained model from [here](https://drive.google.com/drive/folders/1neywqc7OC5dRErQJFCnCor5fphkKCzHh?usp=sharing) and place it in a new ```models``` directory. The bfloat16 models run best on TPU, and might be slow on GPU. 
