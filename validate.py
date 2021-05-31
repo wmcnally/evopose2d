@@ -40,6 +40,13 @@ def get_preds(hms, Ms, input_shape, output_shape):
     return preds
 
 
+def to_numpy(x, num_replicas):
+    if num_replicas > 1:
+        return np.concatenate(x.values)
+    else:
+        return x.numpy()
+
+
 def validate(strategy, cfg, model=None, split='val'):
     cfg.DATASET.CACHE = False
     result_path = '{}/{}_{}.json'.format(cfg.MODEL.SAVE_DIR, cfg.MODEL.NAME, split)
@@ -69,16 +76,16 @@ def validate(strategy, cfg, model=None, split='val'):
     for count, batch in enumerate(ds):
         ids, imgs, _, Ms, scores = batch
 
-        ids = np.concatenate(ids.values, axis=0)
-        scores = np.concatenate(scores.values, axis=0)
-        Ms = np.concatenate(Ms.values, axis=0)
+        ids = to_numpy(ids, strategy.num_replicas_in_sync)
+        scores = to_numpy(scores, strategy.num_replicas_in_sync)
+        Ms = to_numpy(Ms, strategy.num_replicas_in_sync)
 
-        hms = strategy.run(predict, args=(imgs,)).values
-        hms = np.array(np.concatenate(hms, axis=0), np.float32)
+        hms = strategy.run(predict, args=(imgs,))
+        hms = to_numpy(hms, strategy.num_replicas_in_sync)
 
         if cfg.VAL.FLIP:
-            flip_hms = strategy.run(predict, args=(imgs, True,)).values
-            flip_hms = np.concatenate(flip_hms, axis=0)
+            flip_hms = strategy.run(predict, args=(imgs, True,))
+            flip_hms = to_numpy(flip_hms, strategy.num_replicas_in_sync)
             flip_hms = flip_hms[:, :, ::-1, :]
             tmp = flip_hms.copy()
             for i in range(len(cfg.DATASET.KP_FLIP)):
@@ -122,6 +129,7 @@ def validate(strategy, cfg, model=None, split='val'):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--tpu', default=None)
+    parser.add_argument('--gpu', default=None)
     parser.add_argument('-c', '--cfg', required=True)  # yaml
     parser.add_argument('--det', type=int, default=-1)
     parser.add_argument('--ckpt', default=None)
@@ -136,7 +144,11 @@ if __name__ == '__main__':
         cfg.MODEL.NAME += '_{}'.format(args.ckpt)
     if args.det >= 0:
         cfg.VAL.DET = bool(args.det)
-    tpu, strategy = detect_hardware(args.tpu)
+
+    if args.gpu is not None:
+        strategy = tf.distribute.OneDeviceStrategy('/GPU:{}'.format(args.gpu))
+    else:
+        tpu, strategy = detect_hardware(args.tpu)
 
     if args.split == 'val':
         AP = validate(strategy, cfg, split='val')
