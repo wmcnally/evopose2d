@@ -7,7 +7,8 @@ from contextlib import contextmanager
 
 import numpy as np
 import tensorflow as tf
-from tensorflow.python.framework.convert_to_constants import convert_variables_to_constants_v2_as_graph
+from tensorflow.python.profiler.model_analyzer import profile
+from tensorflow.python.profiler.option_builder import ProfileOptionBuilder
 
 
 @contextmanager
@@ -48,18 +49,13 @@ def detect_hardware(tpu_name):
 
 
 def get_flops(model, write_path=tempfile.NamedTemporaryFile().name):
-    concrete = tf.function(lambda inputs: model(inputs))
-    concrete_func = concrete.get_concrete_function(
-        [tf.TensorSpec([1, *inputs.shape[1:]]) for inputs in model.inputs])
-    frozen_func, graph_def = convert_variables_to_constants_v2_as_graph(concrete_func)
-    with tf.Graph().as_default() as graph:
-        tf.graph_util.import_graph_def(graph_def, name='')
-        run_meta = tf.compat.v1.RunMetadata()
-        opts = tf.compat.v1.profiler.ProfileOptionBuilder.float_operation()
-        if write_path:
-            opts['output'] = 'file:outfile={}'.format(write_path)  # suppress output
-        flops = tf.compat.v1.profiler.profile(graph=graph, run_meta=run_meta, cmd="op", options=opts)
-        return flops.total_float_ops
+    forward_pass = tf.function(model.call,
+        input_signature=[tf.TensorSpec(shape=(1,) + model.input_shape[1:])])
+    opts = ProfileOptionBuilder.float_operation()
+    if write_path:
+        opts['output'] = 'file:outfile={}'.format(write_path)
+    graph_info = profile(forward_pass.get_concrete_function().graph, options=opts)
+    return graph_info.total_float_ops
 
 
 def add_regularization(model, regularizer=tf.keras.regularizers.l2(0.0001)):
@@ -163,7 +159,6 @@ def partial_weight_transfer(child_layer, parent_weights, disp):
     try:
         child_layer.set_weights(child_weights)
     except:
-
         print("Partial weight transfer failed for '{}'".format(child_layer.name))
 
 
