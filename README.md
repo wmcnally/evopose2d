@@ -11,7 +11,7 @@ These results were generated using the bfloat16 models.
 3. Clone this repo: ```$ git clone https://github.com/wmcnally/evopose2d.git```
 4. Install the dependencies using ```$ pip install -r requirements.txt```
 5. Download the 2017 COCO [training](http://images.cocodataset.org/zips/train2017.zip) and [validation](http://images.cocodataset.org/zips/val2017.zip) images and extract.
-6. Download the 2017 COCO [annotations](http://images.cocodataset.org/annotations/annotations_trainval2017.zip) and extract.
+6. Download the 2017 COCO [annotations](http://images.cocodataset.org/annotations/annotations_trainval2017.zip) and extract to the same folder.
 6. Download the validation person [detections](https://drive.google.com/drive/folders/1fRUDNUDxe9fjqcRZ2bnF_TKMlO0nB_dk?usp=sharing) (from HRNet repo). 
 7. Use [write_tfrecords.py](./write_tfrecords.py) and the detection json to generate the training and validation TFRecords. If using Cloud TPU, upload the TFRecords to a Storage Bucket. 
 
